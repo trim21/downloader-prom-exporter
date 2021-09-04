@@ -18,6 +18,7 @@ var client = resty.New()
 
 func SetupRouter(router fiber.Router) {
 
+	var tz = time.FixedZone("Asia/Shanghai", 8*60*60)
 	router.Get("/mikanani/list.xml", func(c *fiber.Ctx) error {
 		// 重写mikanani的rss feed，在item上添加`pubDate`以支持sonarr
 		res, err := client.R().Get("https://mikanani.me/RSS/Classic")
@@ -30,7 +31,7 @@ func SetupRouter(router fiber.Router) {
 		}
 
 		for _, item := range data.Channel.Items {
-			pubDate, err := time.ParseInLocation("2006-01-02T15:04:05.999", item.Torrent.PubDate, time.Local)
+			pubDate, err := time.ParseInLocation("2006-01-02T15:04:05.999", item.Torrent.PubDate, tz)
 			if err != nil {
 				return err
 			}
