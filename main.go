@@ -18,7 +18,7 @@ func startHTTP() error {
 
 	handler.SetupRouter(app)
 
-	return errors.Wrap(app.Listen(":3001"), "failed to start http server")
+	return errors.Wrap(app.Listen(":80"), "failed to start http server")
 }
 
 func main() {
