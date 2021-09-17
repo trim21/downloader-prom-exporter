@@ -20,13 +20,13 @@ type Rss struct {
 			Link        string `xml:"link"`
 			Title       string `xml:"title"`
 			Description string `xml:"description"`
-			PubDate     string `xml:"pubDate"`
+			PubDate     string `xml:"pubDate,omitempty"`
 			Torrent     struct {
 				Text          string `xml:",chardata"`
 				Xmlns         string `xml:"xmlns,attr"`
 				Link          string `xml:"link"`
 				ContentLength string `xml:"contentLength"`
-				PubDate       string `xml:"pubDate"`
+				PubDate       string `xml:"pubDate,omitempty"`
 			} `xml:"torrent"`
 			Enclosure struct {
 				Text   string `xml:",chardata"`
