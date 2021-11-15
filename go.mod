@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gofiber/fiber/v2 v2.21.0
+	github.com/gofiber/fiber/v2 v2.22.0
 	github.com/gorilla/feeds v1.1.1
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/pkg/errors v0.9.1
