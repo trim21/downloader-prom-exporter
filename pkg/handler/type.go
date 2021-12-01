@@ -37,3 +37,5 @@ type Rss struct {
 		} `xml:"item"`
 	} `xml:"channel"`
 }
+
+type M = map[string]string

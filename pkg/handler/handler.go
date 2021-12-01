@@ -24,6 +24,7 @@ var client = resty.New()
 var tz = time.FixedZone("Asia/Shanghai", 8*60*60)
 
 func SetupRouter(router fiber.Router) {
+	setupRTorrentMetrics(router)
 	router.Get("/rss/:protocol/:domain/+", resizeRss)
 
 	router.Get("/mikanani/list.xml", func(c *fiber.Ctx) error {
@@ -42,6 +43,13 @@ func SetupRouter(router fiber.Router) {
 		}
 
 		return rewriteRSS(c, "https://mikanani.me/RSS/Bangumi?"+q.Encode())
+	})
+	router.Get("/debug", func(c *fiber.Ctx) error {
+		m := make(map[string]string)
+		c.Request().Header.VisitAll(func(key, value []byte) {
+			m[utils.UnsafeString(key)] = utils.UnsafeString(value)
+		})
+		return c.Status(200).JSON(m)
 	})
 }
 
