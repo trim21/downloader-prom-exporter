@@ -2,15 +2,13 @@ package main
 
 import (
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"github.com/gofiber/fiber/v2/utils"
 	"github.com/pkg/errors"
 
 	"app/pkg/handler"
@@ -18,18 +16,22 @@ import (
 
 func startHTTP() error {
 	app := fiber.New(fiber.Config{
-		StrictRouting: true,
-		CaseSensitive: true,
-		GETOnly:       false,
+		DisableStartupMessage: true,
+		StrictRouting:         true,
+		CaseSensitive:         true,
+		GETOnly:               false,
 	})
-
-	app.Use(requestid.New(requestid.Config{Generator: utils.UUIDv4}))
 
 	app.Use(logger.New(logger.Config{
 		Format:       _format(),
 		TimeFormat:   time.RFC3339,
 		TimeInterval: time.Second,
+		Output:       os.Stdout,
 	}))
+
+	app.Get("/test", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("test")
+	})
 
 	handler.SetupRouter(app)
 
@@ -37,21 +39,16 @@ func startHTTP() error {
 }
 
 func _format() string {
-	c := color.New(color.FgCyan)
-	c.EnableColor()
-
 	format := strings.Join([]string{
-		c.Sprint(strconv.Quote("time")) + `: "${time}"`,
+		strconv.Quote("time") + `: "${time}"`,
 
-		c.Sprint(strconv.Quote("requestid")) + `: "${locals:requestid}"`,
+		(strconv.Quote("status")) + `: ${status}`,
 
-		c.Sprint(strconv.Quote("status")) + `: ${status}`,
+		(strconv.Quote("method")) + `: "${method}"`,
 
-		c.Sprint(strconv.Quote("method")) + `: "${method}"`,
+		(strconv.Quote("latency")) + `: "${latency}"`,
 
-		c.Sprint(strconv.Quote("latency")) + `: "${latency}"`,
-
-		c.Sprint(strconv.Quote("path")) + `: "${path}"`,
+		(strconv.Quote("path")) + `: "${path}"`,
 	}, ", ")
 
 	format = "{" + format + "}\n"

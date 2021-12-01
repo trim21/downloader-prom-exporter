@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
@@ -26,18 +27,16 @@ func setupRTorrentMetrics(router fiber.Router) {
 
 	fmt.Println(entryPoint)
 
-	conn := rtorrent.New(entryPoint, true)
-
 	raw := `
 flood_upload_total{hostname=[Name]} [UpTotal]
 flood_download_total{hostname=[Name]} [DownTotal]
-
 flood_upload_rate{hostname=[Name]} [UpRate]
 flood_download_rate{hostname=[Name]} [DownRate]
 
 `
-	template := fasttemplate.New(raw, "[", "]")
+	template := fasttemplate.New(strings.TrimSpace(raw), "[", "]")
 
+	conn := rtorrent.New(entryPoint, true)
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
 		v, err := getSummary(conn)
 		if err != nil {
