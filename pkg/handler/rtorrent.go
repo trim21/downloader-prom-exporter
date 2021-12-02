@@ -5,16 +5,19 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
+	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/valyala/fasttemplate"
+
+	rtorrent2 "app/pkg/rtorrent"
 )
 
 func setupRTorrentMetrics(router fiber.Router) {
+	os.Setenv("RTORRENT_API_ENTRYPOINT", "https://rtorrent.omv.trim21.me/RPC2")
+
 	entryPoint, found := os.LookupEnv("RTORRENT_API_ENTRYPOINT")
 	if !found {
 		return
@@ -27,38 +30,58 @@ func setupRTorrentMetrics(router fiber.Router) {
 
 	fmt.Println(entryPoint)
 
-	raw := `
-flood_upload_total{hostname=[Name]} [UpTotal]
-flood_download_total{hostname=[Name]} [DownTotal]
-flood_upload_rate{hostname=[Name]} [UpRate]
-flood_download_rate{hostname=[Name]} [DownRate]
-
-`
-	template := fasttemplate.New(strings.TrimSpace(raw), "[", "]")
-
 	conn := rtorrent.New(entryPoint, true)
+	rpc := xmlrpc.NewClient(entryPoint, true)
+
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
 		v, err := getSummary(conn)
 		if err != nil {
 			return err
 		}
 
-		s := template.ExecuteString(map[string]interface{}{
-			"Name":      strconv.Quote(v.Hostname),
-			"UpRate":    strconv.Itoa(v.UpRate),
-			"UpTotal":   strconv.Itoa(v.UpTotal),
-			"DownRate":  strconv.Itoa(v.DownRate),
-			"DownTotal": strconv.Itoa(v.DownTotal),
-		})
-		return ctx.SendString(s)
+		torrents, err := rtorrent2.GetTorrents(rpc, rtorrent.ViewSeeding)
+		if err != nil {
+			return errors.Wrap(err, "failed to get torrents from rpc")
+		}
+
+		fmt.Fprintf(ctx, "rtorrent_upload_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.UpTotal)
+		fmt.Fprintf(ctx, "rtorrent_download_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.DownTotal)
+
+		for _, torrent := range torrents {
+			writeRtorrentTorrent(ctx, &torrent)
+		}
+
+		return nil
 	})
+}
+
+const rPrefix = "rtorrent"
+
+func writeRtorrentTorrent(ctx *fiber.Ctx, t *rtorrent2.Torrent) {
+	fmt.Fprintln(ctx)
+	fmt.Fprintln(ctx, "# torrent", strconv.Quote(t.Name))
+	fmt.Fprintln(ctx, "# label:", t.Label)
+
+	if t.Label == "" {
+		fmt.Fprintf(ctx,
+			"%s_torrent_download_total_bytes{hash=%s} %d\n",
+			rPrefix, strconv.Quote(t.Hash), t.DownloadTotal)
+	} else {
+		for _, label := range t.Labels() {
+			fmt.Fprintf(ctx,
+				"%s_torrent_download_bytes{label=%s, hash=%s} %d\n",
+				rPrefix, strconv.Quote(label), strconv.Quote(t.Hash), t.DownloadTotal)
+
+			fmt.Fprintf(ctx,
+				"%s_torrent_upload_bytes{label=%s, hash=%s} %d\n",
+				rPrefix, strconv.Quote(label), strconv.Quote(t.Hash), t.UploadTotal)
+		}
+	}
 }
 
 type RTorrentTransSummary struct {
 	Hostname  string
-	UpRate    int
 	UpTotal   int
-	DownRate  int
 	DownTotal int
 }
 
@@ -81,16 +104,5 @@ func getSummary(conn *rtorrent.RTorrent) (*RTorrentTransSummary, error) {
 		return nil, errors.Wrap(err, "failed to get rTorrent down total")
 	}
 
-	v.UpRate, err = conn.UpRate()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get rTorrent down total")
-	}
-
-	v.DownRate, err = conn.DownRate()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get rTorrent down total")
-	}
-
 	return v, nil
-
 }
