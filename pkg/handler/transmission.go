@@ -31,7 +31,9 @@ func setupTransmissionMetrics(router fiber.Router) {
 	}
 
 	var port uint16 = 9091
+
 	r := u.Port()
+
 	if r != "" {
 		v, err := strconv.Atoi(r)
 		if err != nil {
@@ -41,6 +43,8 @@ func setupTransmissionMetrics(router fiber.Router) {
 	} else {
 		if u.Scheme == "https" {
 			port = 443
+		} else {
+			port = 80
 		}
 	}
 
@@ -49,7 +53,7 @@ func setupTransmissionMetrics(router fiber.Router) {
 	const prefix = "transmission_"
 
 	router.Get("/transmission/metrics", func(ctx *fiber.Ctx) error {
-		client, err := transmissionrpc.New(u.Host, username, password, &transmissionrpc.AdvancedConfig{
+		client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
 			HTTPS: u.Scheme == "https",
 			Port:  port,
 		})
