@@ -54,7 +54,7 @@ flood_download_rate{hostname=[Name]} [DownRate]
 	})
 }
 
-type FloodTransSummary struct {
+type RTorrentTransSummary struct {
 	Hostname  string
 	UpRate    int
 	UpTotal   int
@@ -62,9 +62,9 @@ type FloodTransSummary struct {
 	DownTotal int
 }
 
-func getSummary(conn *rtorrent.RTorrent) (*FloodTransSummary, error) {
+func getSummary(conn *rtorrent.RTorrent) (*RTorrentTransSummary, error) {
 	var err error
-	v := &FloodTransSummary{}
+	v := &RTorrentTransSummary{}
 
 	v.Hostname, err = conn.Name()
 	if err != nil {

@@ -25,6 +25,9 @@ var tz = time.FixedZone("Asia/Shanghai", 8*60*60)
 
 func SetupRouter(router fiber.Router) {
 	setupRTorrentMetrics(router)
+	setupQBitTorrentMetrics(router)
+	setupTransmissionMetrics(router)
+
 	router.Get("/rss/:protocol/:domain/+", resizeRss)
 
 	router.Get("/mikanani/list.xml", func(c *fiber.Ctx) error {

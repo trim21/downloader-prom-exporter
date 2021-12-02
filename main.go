@@ -10,11 +10,26 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"app/pkg/handler"
 )
 
 func startHTTP() error {
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat:   time.RFC3339Nano,
+		DisableTimestamp:  false,
+		DisableHTMLEscape: true,
+		DataKey:           "data",
+		PrettyPrint:       false,
+		// FieldMap: logrus.FieldMap{
+		// 	logrus.FieldKeyTime:  "@timestamp",
+		// 	logrus.FieldKeyLevel: "@level",
+		// 	logrus.FieldKeyMsg:   "@message",
+		// 	logrus.FieldKeyFunc:  "@caller",
+		// },
+	})
+
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		StrictRouting:         true,
@@ -24,7 +39,7 @@ func startHTTP() error {
 
 	app.Use(logger.New(logger.Config{
 		Format:       _format(),
-		TimeFormat:   time.RFC3339,
+		TimeFormat:   time.RFC3339Nano,
 		TimeInterval: time.Second,
 		Output:       os.Stdout,
 	}))
@@ -35,6 +50,7 @@ func startHTTP() error {
 
 	handler.SetupRouter(app)
 
+	logrus.Infoln("start serer")
 	return errors.Wrap(app.Listen(":80"), "failed to start http server")
 }
 
