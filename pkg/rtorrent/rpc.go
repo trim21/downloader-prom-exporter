@@ -31,10 +31,10 @@ func (t Torrent) Labels() []string {
 	return vsm
 }
 
-func GetTorrents(rpc *xmlrpc.Client, view rtorrent.View) ([]Torrent, error) {
+func GetTorrents(rpc *xmlrpc.Client) ([]Torrent, error) {
 	args := []interface{}{
 		"",
-		string(view),
+		string(rtorrent.ViewMain),
 		rtorrent.DName.Query(),
 		rtorrent.DHash.Query(),
 		rtorrent.DLabel.Query(),

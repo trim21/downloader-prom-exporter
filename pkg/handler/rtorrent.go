@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/mrobinsn/go-rtorrent/rtorrent"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -28,18 +27,15 @@ func setupRTorrentMetrics(router fiber.Router) {
 		logrus.Fatalf("can't parse RTORRENT_API_ENTRYPOINT %s", entryPoint)
 	}
 
-	fmt.Println(entryPoint)
-
-	conn := rtorrent.New(entryPoint, true)
 	rpc := xmlrpc.NewClient(entryPoint, true)
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
-		v, err := getSummary(conn)
+		v, err := getSummary2(rpc)
 		if err != nil {
 			return err
 		}
 
-		torrents, err := rtorrent2.GetTorrents(rpc, rtorrent.ViewSeeding)
+		torrents, err := rtorrent2.GetTorrents(rpc)
 		if err != nil {
 			return errors.Wrap(err, "failed to get torrents from rpc")
 		}
@@ -85,24 +81,36 @@ type RTorrentTransSummary struct {
 	DownTotal int
 }
 
-func getSummary(conn *rtorrent.RTorrent) (*RTorrentTransSummary, error) {
-	var err error
+func getSummary2(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
+	results, err := rpc.Call("system.multicall", []interface{}{
+		map[string]interface{}{
+			"methodName": "system.hostname",
+			"params":     []string{},
+		},
+		map[string]interface{}{
+			"methodName": "throttle.global_down.total",
+			"params":     []string{},
+		},
+		map[string]interface{}{
+			"methodName": "throttle.global_up.total",
+			"params":     []string{},
+		},
+	})
+
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get current status")
+	}
+
 	v := &RTorrentTransSummary{}
 
-	v.Hostname, err = conn.Name()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get rTorrent down total")
-	}
+	r1 := (results.([]interface{}))[0]
+	r2 := r1.([]interface{})
 
-	v.DownTotal, err = conn.DownTotal()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get rTorrent down total")
-	}
+	r := r2
 
-	v.UpTotal, err = conn.UpTotal()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get rTorrent down total")
-	}
+	v.Hostname = r[0].([]interface{})[0].(string)
+	v.DownTotal = r[1].([]interface{})[0].(int)
+	v.UpTotal = r[2].([]interface{})[0].(int)
 
 	return v, nil
 }

@@ -54,8 +54,6 @@ func setupTransmissionMetrics(router fiber.Router) {
 		}
 	}
 
-	fmt.Println(u.Hostname(), u.Host, port)
-
 	router.Get("/transmission/metrics", func(ctx *fiber.Ctx) error {
 		client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
 			HTTPS: u.Scheme == "https",
