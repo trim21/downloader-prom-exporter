@@ -73,6 +73,7 @@ func setupTransmissionMetrics(router fiber.Router) {
 		labelUploadCount := make(map[string]int64)
 		labelCount := make(map[string]int64)
 		labelStatusCount := make(map[string]map[string]int64)
+		statusCount := make(map[string]int64)
 
 		status, err := client.SessionStats(ctx.Context())
 		if err != nil {
@@ -80,6 +81,7 @@ func setupTransmissionMetrics(router fiber.Router) {
 		}
 
 		for _, torrent := range torrents {
+			statusCount[torrent.Status.String()]++
 			for _, label := range torrent.Labels {
 				labelDownloadCount[label] += *torrent.DownloadedEver
 				labelUploadCount[label] += *torrent.UploadedEver
@@ -94,6 +96,11 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 		fmt.Fprintln(ctx, "# download and upload label filter")
 		fmt.Fprintln(ctx, "# some torrents are not included in this metrics")
+
+		for _, status := range keys(statusCount) {
+			fmt.Fprintf(ctx, "%sdownload_all_count{status=%s} %d\n", prefix, strconv.Quote(status), statusCount[status])
+		}
+
 		for _, label := range keys(labelDownloadCount) {
 			fmt.Fprintf(ctx, "%sdownload_total{label=%s} %d\n", prefix, strconv.Quote(label), labelDownloadCount[label])
 			fmt.Fprintf(ctx, "%supload_total{label=%s} %d\n", prefix, strconv.Quote(label), labelUploadCount[label])
