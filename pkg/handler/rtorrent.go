@@ -15,8 +15,6 @@ import (
 )
 
 func setupRTorrentMetrics(router fiber.Router) {
-	os.Setenv("RTORRENT_API_ENTRYPOINT", "https://rtorrent.omv.trim21.me/RPC2")
-
 	entryPoint, found := os.LookupEnv("RTORRENT_API_ENTRYPOINT")
 	if !found {
 		return
