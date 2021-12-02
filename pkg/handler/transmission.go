@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -68,13 +69,15 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 		ctx.Status(200)
 
-		var downloadTotal int64
-		var uploadTotal int64
-
 		labelDownloadCount := make(map[string]int64)
 		labelUploadCount := make(map[string]int64)
 		labelCount := make(map[string]int64)
 		labelStatusCount := make(map[string]map[string]int64)
+
+		status, err := client.SessionStats(ctx.Context())
+		if err != nil {
+			return errors.Wrap(err, "failed to get session stats")
+		}
 
 		for _, torrent := range torrents {
 			for _, label := range torrent.Labels {
@@ -86,8 +89,8 @@ func setupTransmissionMetrics(router fiber.Router) {
 		}
 
 		fmt.Fprintln(ctx, "# without label filter")
-		fmt.Fprintf(ctx, "%sdownload_all_total %d\n", prefix, downloadTotal)
-		fmt.Fprintf(ctx, "%supload_all_total %d\n", prefix, uploadTotal)
+		fmt.Fprintf(ctx, "%sdownload_all_total %d\n", prefix, status.CumulativeStats.DownloadedBytes)
+		fmt.Fprintf(ctx, "%supload_all_total %d\n", prefix, status.CurrentStats.UploadedBytes)
 
 		fmt.Fprintln(ctx, "# download and upload label filter")
 		fmt.Fprintln(ctx, "# some torrents are not included in this metrics")
