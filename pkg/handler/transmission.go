@@ -47,17 +47,17 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 	fmt.Println(u.Hostname(), u.Host, port)
 
-	client, err := transmissionrpc.New(u.Host, username, password, &transmissionrpc.AdvancedConfig{
-		HTTPS: u.Scheme == "https",
-		Port:  port,
-	})
-	if err != nil {
-		logrus.Fatalln(err)
-	}
-
 	const prefix = "transmission_"
 
 	router.Get("/transmission/metrics", func(ctx *fiber.Ctx) error {
+		client, err := transmissionrpc.New(u.Host, username, password, &transmissionrpc.AdvancedConfig{
+			HTTPS: u.Scheme == "https",
+			Port:  port,
+		})
+		if err != nil {
+			return err
+		}
+
 		torrents, err := client.TorrentGetAll(ctx.Context())
 		if err != nil {
 			return err
