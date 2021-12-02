@@ -13,7 +13,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const trPrefix = "transmission_"
+
 func setupTransmissionMetrics(router fiber.Router) {
+
+	os.Setenv("TRANSMISSION_API_ENTRYPOINT", "https://admin:password@bt.omv.trim21.me")
+
 	entryPoint, found := os.LookupEnv("TRANSMISSION_API_ENTRYPOINT")
 	if !found {
 		return
@@ -51,8 +56,6 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 	fmt.Println(u.Hostname(), u.Host, port)
 
-	const prefix = "transmission_"
-
 	router.Get("/transmission/metrics", func(ctx *fiber.Ctx) error {
 		client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
 			HTTPS: u.Scheme == "https",
@@ -69,9 +72,6 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 		ctx.Status(200)
 
-		labelDownloadCount := make(map[string]int64)
-		labelUploadCount := make(map[string]int64)
-		labelCount := make(map[string]int64)
 		labelStatusCount := make(map[string]map[string]int64)
 		statusCount := make(map[string]int64)
 
@@ -82,36 +82,52 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 		for _, torrent := range torrents {
 			statusCount[torrent.Status.String()]++
+
 			for _, label := range torrent.Labels {
-				labelDownloadCount[label] += *torrent.DownloadedEver
-				labelUploadCount[label] += *torrent.UploadedEver
-				labelCount[label]++
 				labelStatusCount[label] = increase(labelStatusCount[label], torrent.Status.String())
 			}
 		}
 
 		fmt.Fprintln(ctx, "# without label filter")
-		fmt.Fprintf(ctx, "%sdownload_all_total %d\n", prefix, status.CumulativeStats.DownloadedBytes)
-		fmt.Fprintf(ctx, "%supload_all_total %d\n", prefix, status.CurrentStats.UploadedBytes)
-
-		fmt.Fprintln(ctx, "# download and upload label filter")
-		fmt.Fprintln(ctx, "# some torrents are not included in this metrics")
+		fmt.Fprintf(ctx, "%sdownload_all_total %d\n", trPrefix, status.CumulativeStats.DownloadedBytes)
+		fmt.Fprintf(ctx, "%supload_all_total %d\n", trPrefix, status.CurrentStats.UploadedBytes)
 
 		for _, status := range keys(statusCount) {
-			fmt.Fprintf(ctx, "%sdownload_all_count{status=%s} %d\n", prefix, strconv.Quote(status), statusCount[status])
+			fmt.Fprintf(ctx, "%sdownload_all_count{status=%s} %d\n", trPrefix, strconv.Quote(status), statusCount[status])
 		}
 
-		for _, label := range keys(labelDownloadCount) {
-			fmt.Fprintf(ctx, "%sdownload_total{label=%s} %d\n", prefix, strconv.Quote(label), labelDownloadCount[label])
-			fmt.Fprintf(ctx, "%supload_total{label=%s} %d\n", prefix, strconv.Quote(label), labelUploadCount[label])
-			for _, status := range keys(labelStatusCount[label]) {
-				fmt.Fprintf(ctx, "%scount{label=%s, status=%s} %d\n", prefix, strconv.Quote(label), strconv.Quote(status), labelCount[label])
-			}
-			fmt.Fprintln(ctx)
+		fmt.Fprintln(ctx, "# all torrents")
+		for _, torrent := range torrents {
+			writeTorrent(ctx, &torrent)
 		}
-
 		return nil
 	})
+}
+
+func writeTorrent(ctx *fiber.Ctx, t *transmissionrpc.Torrent) {
+	fmt.Fprintln(ctx, "# torrent", strconv.Quote(*t.Name))
+	fmt.Fprintln(ctx, "# labels", t.Labels)
+
+	if len(t.Labels) == 0 {
+		fmt.Fprintf(ctx,
+			"%sdownload_total{hash=%s} %d\n",
+			trPrefix, strconv.Quote(*t.HashString), *t.DownloadedEver)
+
+		fmt.Fprintf(ctx,
+			"%supload_total{hash=%s} %d\n",
+			trPrefix, strconv.Quote(*t.HashString), *t.UploadedEver)
+
+	} else {
+		for _, label := range t.Labels {
+			fmt.Fprintf(ctx,
+				"%sdownload_total{label=%s,hash=%s} %d\n",
+				trPrefix, strconv.Quote(label), strconv.Quote(*t.HashString), *t.DownloadedEver)
+
+			fmt.Fprintf(ctx,
+				"%supload_total{label=%s,hash=%s} %d\n",
+				trPrefix, strconv.Quote(label), strconv.Quote(*t.HashString), *t.UploadedEver)
+		}
+	}
 }
 
 func keys(m map[string]int64) []string {
