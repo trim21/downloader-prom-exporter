@@ -74,6 +74,9 @@ func setupQBitMetrics(router fiber.Router) {
 		fmt.Fprintf(ctx, "%s_read_cache_overload %s\n", qPrefix, d.ServerState.ReadCacheOverload)
 		fmt.Fprintf(ctx, "%s_write_cache_overload %s\n", qPrefix, d.ServerState.WriteCacheOverload)
 
+		fmt.Fprintf(ctx, "%s_queued_io_jobs %d\n", qPrefix, d.ServerState.QueuedIoJobs)
+		fmt.Fprintf(ctx, "%s_average_queue_time_ms %d\n", qPrefix, d.ServerState.AverageTimeQueue)
+
 		torrents, err := rpc.Torrents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get torrents")
