@@ -17,19 +17,6 @@ import (
 )
 
 func startHTTP() error {
-	logrus.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:   time.RFC3339Nano,
-		DisableTimestamp:  false,
-		DisableHTMLEscape: true,
-		DataKey:           "data",
-		PrettyPrint:       false,
-		// FieldMap: logrus.FieldMap{
-		// 	logrus.FieldKeyTime:  "@timestamp",
-		// 	logrus.FieldKeyLevel: "@level",
-		// 	logrus.FieldKeyMsg:   "@message",
-		// 	logrus.FieldKeyFunc:  "@caller",
-		// },
-	})
 
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
@@ -74,6 +61,35 @@ func _format() string {
 }
 
 func main() {
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat:   time.RFC3339Nano,
+		DisableTimestamp:  false,
+		DisableHTMLEscape: true,
+		DataKey:           "data",
+		PrettyPrint:       false,
+		// FieldMap: logrus.FieldMap{
+		// 	logrus.FieldKeyTime:  "@timestamp",
+		// 	logrus.FieldKeyLevel: "@level",
+		// 	logrus.FieldKeyMsg:   "@message",
+		// 	logrus.FieldKeyFunc:  "@caller",
+		// },
+	})
+
+	logrus.SetLevel(logrus.InfoLevel)
+	envVal := os.Getenv("production")
+	if envVal != "" {
+		prod, err := strconv.ParseBool(envVal)
+		if err != nil {
+			logrus.Error(`can't parse "%s" as bool`, envVal)
+		} else {
+			if !prod {
+				logrus.SetLevel(logrus.DebugLevel)
+				logrus.Debugln("set log level to debug")
+			}
+		}
+	}
+
 	rand.Seed(time.Now().UnixNano())
+
 	log.Fatalln(startHTTP())
 }
