@@ -1,11 +1,11 @@
 package rtorrent
 
 import (
-	"strings"
-
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/pkg/errors"
+
+	"app/pkg/utils"
 )
 
 const (
@@ -23,12 +23,7 @@ type Torrent struct {
 }
 
 func (t Torrent) Labels() []string {
-	s := strings.Split(t.Label, ",")
-	vsm := make([]string, len(s))
-	for i, v := range s {
-		vsm[i] = strings.TrimSpace(v)
-	}
-	return vsm
+	return utils.SplitByComma(t.Label)
 }
 
 func GetTorrents(rpc *xmlrpc.Client) ([]Torrent, error) {

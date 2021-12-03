@@ -16,9 +16,6 @@ import (
 const trPrefix = "transmission_"
 
 func setupTransmissionMetrics(router fiber.Router) {
-
-	os.Setenv("TRANSMISSION_API_ENTRYPOINT", "https://admin:password@bt.omv.trim21.me")
-
 	entryPoint, found := os.LookupEnv("TRANSMISSION_API_ENTRYPOINT")
 	if !found {
 		return

@@ -26,6 +26,7 @@ var tz = time.FixedZone("Asia/Shanghai", 8*60*60)
 func SetupRouter(router fiber.Router) {
 	setupRTorrentMetrics(router)
 	setupTransmissionMetrics(router)
+	setupQBitMetrics(router)
 
 	router.Get("/rss/:protocol/:domain/+", resizeRss)
 
