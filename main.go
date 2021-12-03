@@ -33,6 +33,7 @@ func startHTTP() error {
 	}))
 
 	app.Get("/test", func(ctx *fiber.Ctx) error {
+		logrus.Infoln("test")
 		return ctx.SendString("test")
 	})
 
@@ -63,16 +64,8 @@ func _format() string {
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat:   time.RFC3339Nano,
-		DisableTimestamp:  false,
 		DisableHTMLEscape: true,
 		DataKey:           "data",
-		PrettyPrint:       false,
-		// FieldMap: logrus.FieldMap{
-		// 	logrus.FieldKeyTime:  "@timestamp",
-		// 	logrus.FieldKeyLevel: "@level",
-		// 	logrus.FieldKeyMsg:   "@message",
-		// 	logrus.FieldKeyFunc:  "@caller",
-		// },
 	})
 
 	logrus.SetLevel(logrus.InfoLevel)
@@ -84,6 +77,16 @@ func main() {
 		} else {
 			if !prod {
 				logrus.SetLevel(logrus.DebugLevel)
+				logrus.SetFormatter(&logrus.TextFormatter{
+					TimestampFormat:  "15:04:05 Z07:00",
+					ForceColors:      true,
+					ForceQuote:       true,
+					FullTimestamp:    true,
+					SortingFunc:      nil,
+					PadLevelText:     true,
+					FieldMap:         nil,
+					CallerPrettyfier: nil,
+				})
 				logrus.Debugln("set log level to debug")
 			}
 		}
