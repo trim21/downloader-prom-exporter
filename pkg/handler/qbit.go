@@ -49,18 +49,19 @@ func setupQBitMetrics(router fiber.Router) {
 			return errors.Wrap(err, "failed to get main data")
 		}
 
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AlltimeUl))
-		fmt.Fprintf(ctx, "%s_upload_total_bytes %d\n\n", qPrefix, d.ServerState.AlltimeUl)
+		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AllTimeUl))
+		fmt.Fprintf(ctx, "%s_upload_total_bytes %d\n\n", qPrefix, d.ServerState.AllTimeUl)
 
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AlltimeDl))
-		fmt.Fprintf(ctx, "%s_download_total_bytes %d\n\n", qPrefix, d.ServerState.AlltimeDl)
+		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AllTimeDl))
+		fmt.Fprintf(ctx, "%s_download_total_bytes %d\n\n", qPrefix, d.ServerState.AllTimeDl)
+
+		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(int64(d.ServerState.TotalBuffersSize)))
+		fmt.Fprintf(ctx, "%s_total_buffers_size %d\n\n", qPrefix, d.ServerState.TotalBuffersSize)
 
 		fmt.Fprintf(ctx, "%s_dht_nodes %d\n", qPrefix, d.ServerState.DhtNodes)
-
 		fmt.Fprintf(ctx, "%s_read_cache_hits %s\n", qPrefix, d.ServerState.ReadCacheHits)
 		fmt.Fprintf(ctx, "%s_read_cache_overload %s\n", qPrefix, d.ServerState.ReadCacheOverload)
 		fmt.Fprintf(ctx, "%s_write_cache_overload %s\n", qPrefix, d.ServerState.WriteCacheOverload)
-		fmt.Fprintf(ctx, "%s_total_buffers_size %d\n", qPrefix, d.ServerState.TotalBuffersSize)
 
 		torrents, err := rpc.Torrents()
 		if err != nil {

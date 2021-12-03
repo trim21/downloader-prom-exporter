@@ -40,11 +40,11 @@ func (c *Client) get(u string) (*resty.Response, error) {
 // Login logs you in to the qbittorrent client
 // returns the current authentication status
 func (c *Client) Login(username string, password string) (loggedIn bool, err error) {
-	credentials := make(map[string]string)
-	credentials["username"] = username
-	credentials["password"] = password
+	resp, err := c.h.R().
+		SetQueryParam("username", username).
+		SetQueryParam("password", password).
+		Get("api/v2/auth/login")
 
-	resp, err := c.h.R().SetQueryParams(credentials).Get("api/v2/auth/login")
 	if err != nil {
 		return false, err
 	} else if resp.StatusCode() != 200 { // check for correct status code
@@ -91,8 +91,8 @@ type MainData struct {
 	FullUpdate  bool `json:"full_update"`
 	Rid         int  `json:"rid"`
 	ServerState struct {
-		AlltimeDl            int64  `json:"alltime_dl"`
-		AlltimeUl            int64  `json:"alltime_ul"`
+		AllTimeDl            int64  `json:"alltime_dl"`
+		AllTimeUl            int64  `json:"alltime_ul"`
 		AverageTimeQueue     int    `json:"average_time_queue"`
 		ConnectionStatus     string `json:"connection_status"`
 		DhtNodes             int    `json:"dht_nodes"`
@@ -122,7 +122,6 @@ func (c *Client) MainData() (*MainData, error) {
 	var t = &MainData{}
 	resp, err := c.h.R().SetResult(t).
 		SetQueryParam("rid", "0").
-		SetQueryParam("", "233").
 		Get("api/v2/sync/maindata")
 
 	if err != nil {

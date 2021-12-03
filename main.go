@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -73,5 +74,6 @@ func _format() string {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	log.Fatalln(startHTTP())
 }
