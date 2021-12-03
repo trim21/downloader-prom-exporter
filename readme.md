@@ -13,5 +13,4 @@ service:
       QBIT_API_ENTRYPOINT: "https://qb.omv.trim21.me"
     ports:
       - "3003:80"
-
 ```

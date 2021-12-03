@@ -93,10 +93,11 @@ type MainData struct {
 	ServerState struct {
 		AllTimeDl            int64  `json:"alltime_dl"`
 		AllTimeUl            int64  `json:"alltime_ul"`
-		AverageTimeQueue     int    `json:"average_time_queue"`
-		ConnectionStatus     string `json:"connection_status"`
 		DhtNodes             int    `json:"dht_nodes"`
 		DlInfoData           int64  `json:"dl_info_data"`
+		UpInfoData           int64  `json:"up_info_data"`
+		AverageTimeQueue     int    `json:"average_time_queue"`
+		ConnectionStatus     string `json:"connection_status"`
 		DlInfoSpeed          int    `json:"dl_info_speed"`
 		DlRateLimit          int    `json:"dl_rate_limit"`
 		FreeSpaceOnDisk      int64  `json:"free_space_on_disk"`
@@ -110,12 +111,33 @@ type MainData struct {
 		TotalPeerConnections int    `json:"total_peer_connections"`
 		TotalQueuedSize      int    `json:"total_queued_size"`
 		TotalWastedSession   int    `json:"total_wasted_session"`
-		UpInfoData           int64  `json:"up_info_data"`
 		UpInfoSpeed          int    `json:"up_info_speed"`
 		UpRateLimit          int    `json:"up_rate_limit"`
 		UseAltSpeedLimits    bool   `json:"use_alt_speed_limits"`
 		WriteCacheOverload   string `json:"write_cache_overload"`
 	} `json:"server_state"`
+}
+
+type Transfer struct {
+	DhtNodes   int   `json:"dht_nodes"`
+	DlInfoData int64 `json:"dl_info_data"`
+	UpInfoData int64 `json:"up_info_data"`
+}
+
+func (c *Client) Transfer() (*Transfer, error) {
+	var t = &Transfer{}
+	resp, err := c.h.R().SetResult(t).
+		Get("api/v2/transfer/info")
+
+	if err != nil {
+		return nil, errors.Wrap(err, "can't connect to http daemon")
+	}
+
+	if resp.StatusCode() >= 300 {
+		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
+	}
+
+	return t, nil
 }
 
 func (c *Client) MainData() (*MainData, error) {
