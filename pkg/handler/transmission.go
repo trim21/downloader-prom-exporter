@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
@@ -111,7 +112,7 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 
 func writeTorrent(ctx io.Writer, t *transmissionrpc.Torrent) {
 	fmt.Fprintln(ctx, "\n# torrent", strconv.Quote(*t.Name))
-	fmt.Fprintln(ctx, "# labels", t.Labels)
+	fmt.Fprintln(ctx, "# labels:", strings.Join(t.Labels, ", "))
 
 	if len(t.Labels) == 0 {
 		fmt.Fprintf(ctx,
