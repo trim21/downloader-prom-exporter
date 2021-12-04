@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   main:
@@ -33,5 +36,6 @@ jobs:
       - run: |
           echo $DOCKER_TOKEN | docker login ghcr.io -u Trim21 --password-stdin
           docker push ghcr.io/trim21/my-site-proxy:latest
+        if: github.event_name == 'push'
         env:
           DOCKER_TOKEN: ${{ github.token }}
