@@ -17,7 +17,6 @@ import (
 )
 
 func startHTTP() error {
-
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		StrictRouting:         true,
@@ -34,12 +33,13 @@ func startHTTP() error {
 
 	app.Get("/test", func(ctx *fiber.Ctx) error {
 		logrus.Infoln("test")
+
 		return ctx.SendString("test")
 	})
 
 	handler.SetupRouter(app)
-
 	logrus.Infoln("start serer")
+
 	return errors.Wrap(app.Listen(":80"), "failed to start http server")
 }
 
@@ -69,26 +69,25 @@ func main() {
 	})
 
 	logrus.SetLevel(logrus.InfoLevel)
+
 	envVal := os.Getenv("production")
 	if envVal != "" {
 		prod, err := strconv.ParseBool(envVal)
 		if err != nil {
-			logrus.Error(`can't parse "%s" as bool`, envVal)
-		} else {
-			if !prod {
-				logrus.SetLevel(logrus.DebugLevel)
-				logrus.SetFormatter(&logrus.TextFormatter{
-					TimestampFormat:  "15:04:05 Z07:00",
-					ForceColors:      true,
-					ForceQuote:       true,
-					FullTimestamp:    true,
-					SortingFunc:      nil,
-					PadLevelText:     true,
-					FieldMap:         nil,
-					CallerPrettyfier: nil,
-				})
-				logrus.Debugln("set log level to debug")
-			}
+			logrus.Errorf(`can't parse "%s" as bool`, envVal)
+		} else if !prod {
+			logrus.SetLevel(logrus.DebugLevel)
+			logrus.SetFormatter(&logrus.TextFormatter{
+				TimestampFormat:  "15:04:05 Z07:00",
+				ForceColors:      true,
+				ForceQuote:       true,
+				FullTimestamp:    true,
+				SortingFunc:      nil,
+				PadLevelText:     true,
+				FieldMap:         nil,
+				CallerPrettyfier: nil,
+			})
+			logrus.Debugln("set log level to debug")
 		}
 	}
 

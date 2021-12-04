@@ -1,6 +1,8 @@
 package rtorrent
 
 import (
+	"encoding/xml"
+
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/pkg/errors"
@@ -13,7 +15,7 @@ const (
 	DUploadTotal   rtorrent.Field = "d.up.total"
 )
 
-// Torrent represents a torrent in rTorrent
+// Torrent represents a torrent in rTorrent.
 type Torrent struct {
 	Name          string
 	Hash          string
@@ -26,7 +28,14 @@ func (t Torrent) Labels() []string {
 	return utils.SplitByComma(t.Label)
 }
 
-func GetTorrents(rpc *xmlrpc.Client) ([]Torrent, error) {
+func GetTorrents(rpc *xmlrpc.Client) (torrents []Torrent, err error) {
+	defer func() {
+		e := recover()
+		if e != nil {
+			err = xml.UnmarshalError("can't decode torrent property array")
+		}
+	}()
+
 	args := []interface{}{
 		"",
 		string(rtorrent.ViewMain),
@@ -36,16 +45,19 @@ func GetTorrents(rpc *xmlrpc.Client) ([]Torrent, error) {
 		DDownloadTotal.Query(),
 		DUploadTotal.Query(),
 	}
-	results, err := rpc.Call("d.multicall2", args...)
 
-	var torrents []Torrent
+	results, err := rpc.Call("d.multicall2", args...)
 	if err != nil {
 		return torrents, errors.Wrap(err, "d.multicall2 XMLRPC call failed")
 	}
 
 	for _, outerResult := range results.([]interface{}) {
 		for _, innerResult := range outerResult.([]interface{}) {
-			torrentData := innerResult.([]interface{})
+			torrentData, ok := innerResult.([]interface{})
+			if !ok {
+				return nil, xml.UnmarshalError("can't decode torrent property array")
+			}
+
 			torrents = append(torrents, Torrent{
 				Name:          torrentData[0].(string),
 				Hash:          torrentData[1].(string),

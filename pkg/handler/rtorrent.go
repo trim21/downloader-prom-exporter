@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"strconv"
@@ -41,8 +43,8 @@ func setupRTorrentMetrics(router fiber.Router) {
 		fmt.Fprintf(ctx, "rtorrent_upload_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.UpTotal)
 		fmt.Fprintf(ctx, "rtorrent_download_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.DownTotal)
 
-		for _, torrent := range torrents {
-			writeRtorrentTorrent(ctx, &torrent)
+		for i := range torrents {
+			writeRtorrentTorrent(ctx, &torrents[i])
 		}
 
 		return nil
@@ -51,7 +53,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 
 const rPrefix = "rtorrent"
 
-func writeRtorrentTorrent(ctx *fiber.Ctx, t *rtorrent2.Torrent) {
+func writeRtorrentTorrent(ctx io.Writer, t *rtorrent2.Torrent) {
 	fmt.Fprintln(ctx)
 	fmt.Fprintln(ctx, "# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(ctx, "# label:", t.Label)
@@ -79,6 +81,8 @@ type RTorrentTransSummary struct {
 	DownTotal int
 }
 
+var ErrUnmarshal = xml.UnmarshalError("failed to decode xmlrpc multicall response")
+
 func getSummary2(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
 	results, err := rpc.Call("system.multicall", []interface{}{
 		map[string]interface{}{
@@ -94,21 +98,38 @@ func getSummary2(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
 			"params":     []string{},
 		},
 	})
-
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get current status")
 	}
 
 	v := &RTorrentTransSummary{}
 
-	r1 := (results.([]interface{}))[0]
-	r2 := r1.([]interface{})
+	r1, ok := results.([]interface{})
+	if !ok {
+		return nil, ErrUnmarshal
+	}
+
+	r2, ok := r1[0].([]interface{})
+	if !ok {
+		return nil, ErrUnmarshal
+	}
 
 	r := r2
 
-	v.Hostname = r[0].([]interface{})[0].(string)
-	v.DownTotal = r[1].([]interface{})[0].(int)
-	v.UpTotal = r[2].([]interface{})[0].(int)
+	v.Hostname, ok = r[0].([]interface{})[0].(string)
+	if !ok {
+		return nil, ErrUnmarshal
+	}
+
+	v.DownTotal, ok = r[1].([]interface{})[0].(int)
+	if !ok {
+		return nil, ErrUnmarshal
+	}
+
+	v.UpTotal, ok = r[2].([]interface{})[0].(int)
+	if !ok {
+		return nil, ErrUnmarshal
+	}
 
 	return v, nil
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"strconv"
@@ -32,15 +33,17 @@ func setupQBitMetrics(router fiber.Router) {
 		logrus.Fatalln(err)
 	}
 
-	router.Get("/qbit/metrics", func(ctx *fiber.Ctx) error {
-		if rpc == nil {
-			return ctx.SendString("hehe")
-		}
-		logined, err := rpc.Login("", "")
+	router.Get("/qbit/metrics", createQbitHandler(rpc))
+}
+
+func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		success, err := rpc.Login("", "")
 		if err != nil {
 			return errors.Wrap(err, "failed to login")
 		}
-		if !logined {
+
+		if !success {
 			return fiber.ErrUnauthorized
 		}
 
@@ -54,65 +57,65 @@ func setupQBitMetrics(router fiber.Router) {
 			return errors.Wrap(err, "failed to get main data")
 		}
 
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AllTimeUl))
-		fmt.Fprintf(ctx, "%s_upload_total_bytes %d\n\n", qPrefix, d.ServerState.AllTimeUl)
-
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(d.ServerState.AllTimeDl))
-		fmt.Fprintf(ctx, "%s_download_total_bytes %d\n\n", qPrefix, d.ServerState.AllTimeDl)
-
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(t.DlInfoData))
-		fmt.Fprintf(ctx, "%s_dl_info_data_bytes %d\n\n", qPrefix, t.DlInfoData)
-
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(t.UpInfoData))
-		fmt.Fprintf(ctx, "%s_up_info_data_bytes %d\n\n", qPrefix, t.UpInfoData)
-
-		fmt.Fprintf(ctx, "# %s\n", utils.ByteCountIEC(int64(d.ServerState.TotalBuffersSize)))
-		fmt.Fprintf(ctx, "%s_total_buffers_size %d\n\n", qPrefix, d.ServerState.TotalBuffersSize)
-
-		fmt.Fprintf(ctx, "%s_dht_nodes %d\n", qPrefix, t.DhtNodes)
-		fmt.Fprintf(ctx, "%s_read_cache_hits %s\n", qPrefix, d.ServerState.ReadCacheHits)
-		fmt.Fprintf(ctx, "%s_read_cache_overload %s\n", qPrefix, d.ServerState.ReadCacheOverload)
-		fmt.Fprintf(ctx, "%s_write_cache_overload %s\n", qPrefix, d.ServerState.WriteCacheOverload)
-
-		fmt.Fprintf(ctx, "%s_queued_io_jobs %d\n", qPrefix, d.ServerState.QueuedIoJobs)
-		fmt.Fprintf(ctx, "%s_average_queue_time_ms %d\n", qPrefix, d.ServerState.AverageTimeQueue)
+		writeGlobalData(ctx, &d.ServerState, t)
 
 		torrents, err := rpc.Torrents()
 		if err != nil {
 			return errors.Wrap(err, "failed to get torrents")
 		}
 
-		for _, t := range torrents {
-			writeQBitTorrent(ctx, &t)
-			// fmt.Fprintln(ctx)
-			// fmt.Fprintln(ctx, t.Name)
-			// fmt.Fprintln(ctx, t.Category)
+		for i := range torrents {
+			writeQBitTorrent(ctx, &torrents[i])
 		}
 
 		return nil
-	})
+	}
 }
 
-func writeQBitTorrent(ctx *fiber.Ctx, t *qbittorrent.Torrent) {
-	fmt.Fprintln(ctx)
-	fmt.Fprintln(ctx, "# torrent", strconv.Quote(t.Name))
-	fmt.Fprintln(ctx, "# category:", t.Category)
-	if t.Category != "" {
+func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Transfer) {
+	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeUl))
+	fmt.Fprintf(w, "%s_upload_total_bytes %d\n\n", qPrefix, s.AllTimeUl)
 
-		fmt.Fprintf(ctx,
+	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeDl))
+	fmt.Fprintf(w, "%s_download_total_bytes %d\n\n", qPrefix, s.AllTimeDl)
+
+	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.DlInfoData))
+	fmt.Fprintf(w, "%s_dl_info_data_bytes %d\n\n", qPrefix, t.DlInfoData)
+
+	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.UpInfoData))
+	fmt.Fprintf(w, "%s_up_info_data_bytes %d\n\n", qPrefix, t.UpInfoData)
+
+	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(int64(s.TotalBuffersSize)))
+	fmt.Fprintf(w, "%s_total_buffers_size %d\n\n", qPrefix, s.TotalBuffersSize)
+
+	fmt.Fprintf(w, "%s_dht_nodes %d\n", qPrefix, t.DhtNodes)
+	fmt.Fprintf(w, "%s_read_cache_hits %s\n", qPrefix, s.ReadCacheHits)
+	fmt.Fprintf(w, "%s_read_cache_overload %s\n", qPrefix, s.ReadCacheOverload)
+	fmt.Fprintf(w, "%s_write_cache_overload %s\n", qPrefix, s.WriteCacheOverload)
+
+	fmt.Fprintf(w, "%s_queued_io_jobs %d\n", qPrefix, s.QueuedIoJobs)
+	fmt.Fprintf(w, "%s_average_queue_time_ms %d\n", qPrefix, s.AverageTimeQueue)
+}
+
+func writeQBitTorrent(w io.Writer, t *qbittorrent.Torrent) {
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
+	fmt.Fprintln(w, "# category:", t.Category)
+
+	if t.Category != "" {
+		fmt.Fprintf(w,
 			"%s_torrent_download_bytes{category=%s, hash=%s} %d\n",
 			qPrefix, strconv.Quote(t.Category), strconv.Quote(t.Hash), t.Downloaded)
 
-		fmt.Fprintf(ctx,
+		fmt.Fprintf(w,
 			"%s_torrent_upload_bytes{category=%s, hash=%s} %d\n",
 			qPrefix, strconv.Quote(t.Category), strconv.Quote(t.Hash), t.Uploaded)
-
 	} else {
-		fmt.Fprintf(ctx,
+		fmt.Fprintf(w,
 			"%s_torrent_download_bytes{hash=%s} %d\n",
 			qPrefix, strconv.Quote(t.Hash), t.Downloaded)
 
-		fmt.Fprintf(ctx,
+		fmt.Fprintf(w,
 			"%s_torrent_upload_bytes{hash=%s} %d\n",
 			qPrefix, strconv.Quote(t.Hash), t.Uploaded)
 	}
