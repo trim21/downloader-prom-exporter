@@ -110,7 +110,7 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 }
 
 func writeTorrent(ctx io.Writer, t *transmissionrpc.Torrent) {
-	fmt.Fprintln(ctx, "# torrent", strconv.Quote(*t.Name))
+	fmt.Fprintln(ctx, "\n# torrent", strconv.Quote(*t.Name))
 	fmt.Fprintln(ctx, "# labels", t.Labels)
 
 	if len(t.Labels) == 0 {
