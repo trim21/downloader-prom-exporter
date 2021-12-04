@@ -2,8 +2,6 @@ FROM alpine
 
 ENV production=1
 
-WORKDIR /work/
+COPY dist/app /work/my-site-proxy
 
-COPY dist/app /work/app
-
-ENTRYPOINT ["/work/app"]
+ENTRYPOINT ["/work/my-site-proxy"]

@@ -28,7 +28,7 @@ func ByteCountSI(b int64) string {
 		exp++
 	}
 
-	return strconv.FormatFloat(float64(b)/float64(div), 'f', 1, 64) + //nolint:gomnd
+	return strconv.FormatFloat(float64(b)/float64(div), 'f', 1, 64) +
 		" " + string("kMGTPE"[exp]) + "iB"
 }
 
@@ -44,6 +44,6 @@ func ByteCountIEC(b int64) string {
 		exp++
 	}
 
-	return strconv.FormatFloat(float64(b)/float64(div), 'f', 1, 64) + //nolint:gomnd
+	return strconv.FormatFloat(float64(b)/float64(div), 'f', 1, 64) +
 		" " + string("KMGTPE"[exp]) + "iB"
 }
