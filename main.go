@@ -26,7 +26,7 @@ func startHTTP() error {
 
 	app.Use(logger.New(logger.Config{
 		Format:       _format(),
-		TimeFormat:   time.RFC3339Nano,
+		TimeFormat:   time.RFC3339,
 		TimeInterval: time.Second,
 		Output:       os.Stdout,
 	}))
@@ -63,7 +63,7 @@ func _format() string {
 
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:   time.RFC3339Nano,
+		TimestampFormat:   time.RFC3339,
 		DisableHTMLEscape: true,
 		DataKey:           "data",
 	})

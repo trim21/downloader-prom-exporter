@@ -53,21 +53,21 @@ func setupTransmissionMetrics(router fiber.Router) {
 		}
 	}
 
-	router.Get(
-		"/transmission/metrics",
-		createTransmissionHandler(u.Scheme, u.Hostname(), port, username, password),
-	)
-}
-
-func createTransmissionHandler(scheme, hostname string, port uint16, username, password string) fiber.Handler {
-	client, err := transmissionrpc.New(hostname, username, password, &transmissionrpc.AdvancedConfig{
-		HTTPS: scheme == "https",
+	client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
+		HTTPS: u.Scheme == "https",
 		Port:  port,
 	})
 	if err != nil {
 		logrus.Fatalln("failed to create transmission client")
 	}
 
+	router.Get(
+		"/transmission/metrics",
+		createTransmissionHandler(client),
+	)
+}
+
+func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 	var torrents []transmissionrpc.Torrent
 	var torrentMux sync.RWMutex
 
