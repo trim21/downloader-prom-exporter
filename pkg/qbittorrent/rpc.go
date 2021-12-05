@@ -53,12 +53,12 @@ func (c *Client) Login(username string, password string) (loggedIn bool, err err
 }
 
 type Torrent struct {
-	Uploaded   int64  `json:"uploaded"`
-	Name       string `json:"name"`
 	// Hash       string `json:"hash"`
+	Name       string `json:"name"`
 	RawTags    string `json:"tags"`
 	Category   string `json:"category"`
 	State      string `json:"state"`
+	Uploaded   int64  `json:"uploaded"`
 	Downloaded int64  `json:"downloaded"`
 }
 
