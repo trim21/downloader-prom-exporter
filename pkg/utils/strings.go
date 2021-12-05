@@ -47,3 +47,18 @@ func ByteCountIEC(b int64) string {
 	return strconv.FormatFloat(float64(b)/float64(div), 'f', 1, 64) +
 		" " + string("KMGTPE"[exp]) + "iB"
 }
+
+func ByteCountIECFloat64(b float64) string {
+	const unit = 1024.0
+	if b < unit {
+		return strconv.FormatFloat(b, 'f', 1, 64) + " B"
+	}
+
+	div, exp := unit, 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	return strconv.FormatFloat(b/div, 'f', 1, 64) + " " + string("KMGTPE"[exp]) + "iB"
+}

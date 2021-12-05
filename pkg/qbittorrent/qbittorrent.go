@@ -68,6 +68,8 @@ type Torrent struct {
 	TotalSize    int64   `json:"total_size"`
 	Progress     float64 `json:"progress"`
 	SuperSeeding bool    `json:"super_seeding"`
+	Ratio        float64 `json:"ratio"`
+	MaxRatio     float64 `json:"max_ratio"`
 }
 
 // Hash       string `json:"hash"`
