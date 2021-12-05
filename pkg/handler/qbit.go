@@ -110,6 +110,7 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 		label = fmt.Sprintf("hash=%s, state=%s", strconv.Quote(hash), strconv.Quote(t.State))
 	}
 
+	fmt.Fprintf(w, "%s_torrent_todo_bytes{%s} %d\n", qPrefix, label, t.AmountLeft)
 	fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", qPrefix, label, t.Downloaded)
 	fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", qPrefix, label, t.Uploaded)
 }

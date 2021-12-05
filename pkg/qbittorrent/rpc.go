@@ -61,12 +61,12 @@ type Torrent struct {
 	Downloaded int64  `json:"downloaded"`
 	// download bytes
 	Completed int64 `json:"completed"`
-	// total size bytes
-	Size int64 `json:"size"`
 	// rest need to download bytes
 	AmountLeft int64 `json:"amount_left"`
-	TotalSize  int64 `json:"total_size"`
-	Progress   int   `json:"progress"`
+
+	Size      int64   `json:"size"`
+	TotalSize int64   `json:"total_size"`
+	Progress  float64 `json:"progress"`
 }
 
 // Hash       string `json:"hash"`
