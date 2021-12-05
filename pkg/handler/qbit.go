@@ -115,8 +115,9 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 			break
 		}
 		restUpload := float64(t.Downloaded) * (t.MaxRatio - t.Ratio)
-		fmt.Fprintf(w, "# %s\n", utils.ByteCountIECFloat64(restUpload))
 		fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} %f\n", label, restUpload)
+	default:
+		fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} 0\n", label)
 	}
 
 	fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} %d\n", label, t.AmountLeft)
