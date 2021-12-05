@@ -109,13 +109,13 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 	statusFunc()
 
 	go func() {
-		for range time.NewTimer(time.Second * 5).C {
+		for range time.NewTicker(time.Second * 5).C {
 			torrentFunc()
 		}
 	}()
 
 	go func() {
-		for range time.NewTimer(time.Second * 5).C {
+		for range time.NewTicker(time.Second * 5).C {
 			statusFunc()
 		}
 	}()
