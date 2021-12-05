@@ -14,6 +14,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,9 +79,9 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 
 	var torrentFunc = func() {
 		if v, err := client.TorrentGetAll(context.TODO()); err != nil {
-			logrus.Errorln("failed to get torrents", err)
 			torrentMux.Lock()
-			torrentsErr = err
+			torrentsErr = errors.Wrap(err, "failed to get torrents")
+			logrus.Errorln(torrentsErr)
 			torrentMux.Unlock()
 		} else {
 			torrentMux.Lock()
@@ -92,9 +93,9 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 
 	var statusFunc = func() {
 		if v, err := client.SessionStats(context.TODO()); err != nil {
-			logrus.Errorln("failed to get session stats", err)
 			statusMux.Lock()
-			statusErr = err
+			statusErr = errors.Wrap(err, "failed to get session stats")
+			logrus.Errorln(statusErr)
 			statusMux.Unlock()
 		} else {
 			statusMux.Lock()
