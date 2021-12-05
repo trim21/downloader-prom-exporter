@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -8,10 +9,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,37 +60,72 @@ func setupTransmissionMetrics(router fiber.Router) {
 }
 
 func createTransmissionHandler(scheme, hostname string, port uint16, username, password string) fiber.Handler {
+	client, err := transmissionrpc.New(hostname, username, password, &transmissionrpc.AdvancedConfig{
+		HTTPS: scheme == "https",
+		Port:  port,
+	})
+	if err != nil {
+		logrus.Fatalln("failed to create transmission client")
+	}
+
+	var torrents []transmissionrpc.Torrent
+	var torrentMux sync.RWMutex
+
+	var status transmissionrpc.SessionStats
+	var statusMux sync.RWMutex
+
+	var torrentFunc = func() {
+		if v, err := client.TorrentGetAll(context.TODO()); err != nil {
+			logrus.Errorln("failed to get torrents", err)
+		} else {
+			torrentMux.Lock()
+			torrents = v
+			torrentMux.Unlock()
+		}
+	}
+
+	var statusFunc = func() {
+		if v, err := client.SessionStats(context.TODO()); err != nil {
+			logrus.Errorln("failed to get session stats", err)
+		} else {
+			statusMux.Lock()
+			status = v
+			statusMux.Unlock()
+		}
+	}
+
+	torrentFunc()
+	statusFunc()
+
+	go func() {
+		for range time.NewTimer(time.Second * 5).C {
+			torrentFunc()
+		}
+	}()
+
+	go func() {
+		for range time.NewTimer(time.Second * 5).C {
+			statusFunc()
+		}
+	}()
+
 	return func(ctx *fiber.Ctx) error {
-		client, err := transmissionrpc.New(hostname, username, password, &transmissionrpc.AdvancedConfig{
-			HTTPS: scheme == "https",
-			Port:  port,
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to create transmission rpc client")
-		}
+		statusMux.RLock()
+		fmt.Fprintln(ctx, "# without label filter")
+		fmt.Fprintf(ctx, "transmission_download_all_total %d\n", status.CumulativeStats.DownloadedBytes)
+		fmt.Fprintf(ctx, "transmission_upload_all_total %d\n", status.CurrentStats.UploadedBytes)
+		statusMux.RUnlock()
 
-		torrents, err := client.TorrentGetAll(ctx.Context())
-		if err != nil {
-			return errors.Wrap(err, "failed to get torrents")
-		}
-
-		status, err := client.SessionStats(ctx.Context())
-		if err != nil {
-			return errors.Wrap(err, "failed to get session stats")
-		}
+		torrentMux.RLock()
 
 		statusCount := make(map[string]int64)
-
 		for _, torrent := range torrents {
 			statusCount[torrent.Status.String()]++
 		}
 
-		fmt.Fprintln(ctx, "# without label filter")
-		fmt.Fprintf(ctx, "transmission_download_all_total %d\n", status.CumulativeStats.DownloadedBytes)
-		fmt.Fprintf(ctx, "transmission_upload_all_total %d\n", status.CurrentStats.UploadedBytes)
-
 		for _, status := range keys(statusCount) {
-			fmt.Fprintf(ctx, "transmission_download_all_count{status=%s} %d\n", strconv.Quote(status), statusCount[status])
+			fmt.Fprintf(ctx, "transmission_download_all_count{status=%s} %d\n",
+				strconv.Quote(status), statusCount[status])
 		}
 
 		fmt.Fprintln(ctx, "\n# all torrents")
@@ -96,6 +133,8 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 		for i := range torrents {
 			writeTorrent(ctx, &torrents[i])
 		}
+
+		torrentMux.RUnlock()
 
 		return nil
 	}
