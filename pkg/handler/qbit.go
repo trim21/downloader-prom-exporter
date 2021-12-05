@@ -59,11 +59,6 @@ func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 
 		writeGlobalData(ctx, &d.ServerState, t)
 
-		// torrents, err := rpc.Torrents()
-		// if err != nil {
-		// 	return errors.Wrap(err, "failed to get torrents")
-		// }
-
 		for hash := range d.Torrents {
 			writeQBitTorrent(ctx, hash, d.Torrents[hash])
 		}
@@ -76,33 +71,34 @@ const qDefaultCategory = "UN-CATEGORIZED"
 
 func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Transfer) {
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeUl))
-	fmt.Fprintf(w, "%s_upload_total_bytes %d\n\n", qPrefix, s.AllTimeUl)
+	fmt.Fprintf(w, "qbittorrent_upload_total_bytes %d\n\n", s.AllTimeUl)
 
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeDl))
-	fmt.Fprintf(w, "%s_download_total_bytes %d\n\n", qPrefix, s.AllTimeDl)
+	fmt.Fprintf(w, "qbittorrent_download_total_bytes %d\n\n", s.AllTimeDl)
 
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.DlInfoData))
-	fmt.Fprintf(w, "%s_dl_info_data_bytes %d\n\n", qPrefix, t.DlInfoData)
+	fmt.Fprintf(w, "qbittorrent_dl_info_data_bytes %d\n\n", t.DlInfoData)
 
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.UpInfoData))
-	fmt.Fprintf(w, "%s_up_info_data_bytes %d\n\n", qPrefix, t.UpInfoData)
+	fmt.Fprintf(w, "qbittorrent_up_info_data_bytes %d\n\n", t.UpInfoData)
 
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(int64(s.TotalBuffersSize)))
-	fmt.Fprintf(w, "%s_total_buffers_size %d\n\n", qPrefix, s.TotalBuffersSize)
+	fmt.Fprintf(w, "qbittorrent_total_buffers_size %d\n\n", s.TotalBuffersSize)
 
-	fmt.Fprintf(w, "%s_dht_nodes %d\n", qPrefix, t.DhtNodes)
-	fmt.Fprintf(w, "%s_read_cache_hits %s\n", qPrefix, s.ReadCacheHits)
-	fmt.Fprintf(w, "%s_read_cache_overload %s\n", qPrefix, s.ReadCacheOverload)
-	fmt.Fprintf(w, "%s_write_cache_overload %s\n", qPrefix, s.WriteCacheOverload)
+	fmt.Fprintf(w, "qbittorrent_dht_nodes %d\n", t.DhtNodes)
+	fmt.Fprintf(w, "qbittorrent_read_cache_hits %s\n", s.ReadCacheHits)
+	fmt.Fprintf(w, "qbittorrent_read_cache_overload %s\n", s.ReadCacheOverload)
+	fmt.Fprintf(w, "qbittorrent_write_cache_overload %s\n", s.WriteCacheOverload)
 
-	fmt.Fprintf(w, "%s_queued_io_jobs %d\n", qPrefix, s.QueuedIoJobs)
-	fmt.Fprintf(w, "%s_average_queue_time_ms %d\n", qPrefix, s.AverageTimeQueue)
+	fmt.Fprintf(w, "qbittorrent_queued_io_jobs %d\n", s.QueuedIoJobs)
+	fmt.Fprintf(w, "qbittorrent_average_queue_time_ms %d\n", s.AverageTimeQueue)
 }
 
 func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(w, "# category:", t.Category)
+	fmt.Fprintln(w, "# super_seeding:", t.SuperSeeding)
 
 	var label string
 	if t.Category != "" {
@@ -113,7 +109,7 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 			strconv.Quote(qDefaultCategory), strconv.Quote(hash), strconv.Quote(t.State))
 	}
 
-	fmt.Fprintf(w, "%s_torrent_todo_bytes{%s} %d\n", qPrefix, label, t.AmountLeft)
-	fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", qPrefix, label, t.Downloaded)
-	fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", qPrefix, label, t.Uploaded)
+	fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} %d\n", label, t.AmountLeft)
+	fmt.Fprintf(w, "qbittorrent_torrent_download_bytes{%s} %d\n", label, t.Downloaded)
+	fmt.Fprintf(w, "qbittorrent_torrent_upload_bytes{%s} %d\n", label, t.Uploaded)
 }

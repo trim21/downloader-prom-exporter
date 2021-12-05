@@ -30,7 +30,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 	rpc := xmlrpc.NewClient(entryPoint, true)
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
-		v, err := getSummary2(rpc)
+		v, err := getGlobalData(rpc)
 		if err != nil {
 			return err
 		}
@@ -51,26 +51,21 @@ func setupRTorrentMetrics(router fiber.Router) {
 	})
 }
 
-const rPrefix = "rtorrent"
-
-func writeRtorrentTorrent(ctx io.Writer, t *rtorrent2.Torrent) {
-	fmt.Fprintln(ctx)
-	fmt.Fprintln(ctx, "# torrent", strconv.Quote(t.Name))
-	fmt.Fprintln(ctx, "# label:", t.Label)
+func writeRtorrentTorrent(w io.Writer, t *rtorrent2.Torrent) {
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
+	fmt.Fprintln(w, "# label:", t.Label)
 
 	if t.Label == "" {
-		fmt.Fprintf(ctx,
-			"%s_torrent_download_total_bytes{hash=%s} %d\n",
-			rPrefix, strconv.Quote(t.Hash), t.DownloadTotal)
+		fmt.Fprintf(w, "rtorrent_torrent_download_total_bytes{hash=%s} %d\n",
+			strconv.Quote(t.Hash), t.DownloadTotal)
 	} else {
 		for _, label := range t.Labels() {
-			fmt.Fprintf(ctx,
-				"%s_torrent_download_bytes{label=%s, hash=%s} %d\n",
-				rPrefix, strconv.Quote(label), strconv.Quote(t.Hash), t.DownloadTotal)
+			fmt.Fprintf(w, "rtorrent_torrent_download_bytes{label=%s, hash=%s} %d\n",
+				strconv.Quote(label), strconv.Quote(t.Hash), t.DownloadTotal)
 
-			fmt.Fprintf(ctx,
-				"%s_torrent_upload_bytes{label=%s, hash=%s} %d\n",
-				rPrefix, strconv.Quote(label), strconv.Quote(t.Hash), t.UploadTotal)
+			fmt.Fprintf(w, "rtorrent_torrent_upload_bytes{label=%s, hash=%s} %d\n",
+				strconv.Quote(label), strconv.Quote(t.Hash), t.UploadTotal)
 		}
 	}
 }
@@ -83,7 +78,7 @@ type RTorrentTransSummary struct {
 
 var ErrUnmarshal = xml.UnmarshalError("failed to decode xmlrpc multicall response")
 
-func getSummary2(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
+func getGlobalData(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
 	results, err := rpc.Call("system.multicall", []interface{}{
 		map[string]interface{}{
 			"methodName": "system.hostname",
@@ -109,27 +104,76 @@ func getSummary2(rpc *xmlrpc.Client) (*RTorrentTransSummary, error) {
 		return nil, ErrUnmarshal
 	}
 
-	r2, ok := r1[0].([]interface{})
+	r, ok := r1[0].([]interface{})
 	if !ok {
 		return nil, ErrUnmarshal
 	}
 
-	r := r2
+	/*
+		r is a value like this
+		```
+		[
+			[	"hostname" ], // "system.hostname"
+			[ 1 ], // "throttle.global_down.total"
+			[ 2 ], // "throttle.global_up.total"
+		]
+		```
+	*/
 
-	v.Hostname, ok = r[0].([]interface{})[0].(string)
+	v.Hostname, ok = getString(r, 0)
 	if !ok {
-		return nil, ErrUnmarshal
+		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'system.hostname'")
 	}
 
-	v.DownTotal, ok = r[1].([]interface{})[0].(int)
+	v.DownTotal, ok = getInt(r, 1)
 	if !ok {
-		return nil, ErrUnmarshal
+		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_down.total'")
 	}
 
-	v.UpTotal, ok = r[2].([]interface{})[0].(int)
+	v.UpTotal, ok = getInt(r, 2) //nolint:gomnd
 	if !ok {
-		return nil, ErrUnmarshal
+		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_up.total'")
 	}
 
 	return v, nil
+}
+
+// get first value from [][]interface{} as string
+func getString(r []interface{}, index int) (string, bool) {
+	vv, ok := r[index].([]interface{})
+	if !ok {
+		return "", ok
+	}
+
+	v, ok := vv[0].(string)
+
+	return v, ok
+}
+
+// get first value from [][]interface{} as int
+func getInt(r []interface{}, index int) (int, bool) {
+	vv, ok := r[index].([]interface{})
+	if !ok {
+		return 0, ok
+	}
+
+	v, ok := vv[0].(int)
+
+	return v, ok
+}
+
+// get first value from [][]interface{} as int
+func getInt64(r []interface{}, index int) (int64, bool) {
+	vv, ok := r[index].([]interface{})
+	if !ok {
+		return 0, ok
+	}
+
+	v, ok := vv[0].(int64)
+
+	if !ok {
+		fmt.Println(vv[0])
+	}
+
+	return v, ok
 }

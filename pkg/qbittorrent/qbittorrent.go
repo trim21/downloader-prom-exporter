@@ -64,9 +64,10 @@ type Torrent struct {
 	// rest need to download bytes
 	AmountLeft int64 `json:"amount_left"`
 
-	Size      int64   `json:"size"`
-	TotalSize int64   `json:"total_size"`
-	Progress  float64 `json:"progress"`
+	Size         int64   `json:"size"`
+	TotalSize    int64   `json:"total_size"`
+	Progress     float64 `json:"progress"`
+	SuperSeeding bool    `json:"super_seeding"`
 }
 
 // Hash       string `json:"hash"`

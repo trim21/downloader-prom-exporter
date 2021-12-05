@@ -15,8 +15,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const trPrefix = "transmission"
-
 func setupTransmissionMetrics(router fiber.Router) {
 	entryPoint, found := os.LookupEnv("TRANSMISSION_API_ENTRYPOINT")
 	if !found {
@@ -86,12 +84,11 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 		}
 
 		fmt.Fprintln(ctx, "# without label filter")
-		fmt.Fprintf(ctx, "%s_download_all_total %d\n", trPrefix, status.CumulativeStats.DownloadedBytes)
-		fmt.Fprintf(ctx, "%s_upload_all_total %d\n", trPrefix, status.CurrentStats.UploadedBytes)
+		fmt.Fprintf(ctx, "transmission_download_all_total %d\n", status.CumulativeStats.DownloadedBytes)
+		fmt.Fprintf(ctx, "transmission_upload_all_total %d\n", status.CurrentStats.UploadedBytes)
 
 		for _, status := range keys(statusCount) {
-			fmt.Fprintf(ctx, "%s_download_all_count{status=%s} %d\n",
-				trPrefix, strconv.Quote(status), statusCount[status])
+			fmt.Fprintf(ctx, "transmission_download_all_count{status=%s} %d\n", strconv.Quote(status), statusCount[status])
 		}
 
 		fmt.Fprintln(ctx, "\n# all torrents")
@@ -111,16 +108,16 @@ func writeTorrent(w io.Writer, t *transmissionrpc.Torrent) {
 	if len(t.Labels) == 0 {
 		label := fmt.Sprintf("hash=%s, status=%s", strconv.Quote(*t.HashString), strconv.Quote(t.Status.String()))
 
-		fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-		fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", trPrefix, label, *t.UploadedEver)
+		fmt.Fprintf(w, "transmission_torrent_download_bytes{%s} %d\n", label, *t.DownloadedEver)
+		fmt.Fprintf(w, "transmission_torrent_upload_bytes{%s} %d\n", label, *t.UploadedEver)
 	} else {
 		for _, label := range t.Labels {
 			fmt.Fprintln(w, "# label ", label)
 			label := fmt.Sprintf("label=%s, hash=%s, status=%s",
 				strconv.Quote(label), strconv.Quote(*t.HashString), strconv.Quote(t.Status.String()))
 
-			fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-			fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", trPrefix, label, *t.UploadedEver)
+			fmt.Fprintf(w, "transmission_torrent_download_bytes{%s} %d\n", label, *t.DownloadedEver)
+			fmt.Fprintf(w, "transmission_torrent_upload_bytes{%s} %d\n", label, *t.UploadedEver)
 		}
 	}
 }
