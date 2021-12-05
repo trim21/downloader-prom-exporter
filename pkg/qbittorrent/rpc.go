@@ -53,11 +53,12 @@ func (c *Client) Login(username string, password string) (loggedIn bool, err err
 }
 
 type Torrent struct {
+	Uploaded   int64  `json:"uploaded"`
 	Name       string `json:"name"`
-	Hash       string `json:"hash"`
+	// Hash       string `json:"hash"`
 	RawTags    string `json:"tags"`
 	Category   string `json:"category"`
-	Uploaded   int64  `json:"uploaded"`
+	State      string `json:"state"`
 	Downloaded int64  `json:"downloaded"`
 }
 
@@ -111,9 +112,10 @@ type ServerState struct {
 // UseAltSpeedLimits    bool   `json:"use_alt_speed_limits"`
 
 type MainData struct {
-	ServerState ServerState `json:"server_state"`
-	FullUpdate  bool        `json:"full_update"`
-	Rid         int         `json:"rid"`
+	Torrents    map[string]Torrent `json:"torrents"`
+	ServerState ServerState        `json:"server_state"`
+	FullUpdate  bool               `json:"full_update"`
+	Rid         int                `json:"rid"`
 }
 
 type Transfer struct {

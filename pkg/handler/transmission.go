@@ -79,15 +79,10 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 			return errors.Wrap(err, "failed to get session stats")
 		}
 
-		labelStatusCount := make(map[string]map[string]int64)
 		statusCount := make(map[string]int64)
 
 		for _, torrent := range torrents {
 			statusCount[torrent.Status.String()]++
-
-			for _, label := range torrent.Labels {
-				labelStatusCount[label] = increase(labelStatusCount[label], torrent.Status.String())
-			}
 		}
 
 		fmt.Fprintln(ctx, "# without label filter")
@@ -99,7 +94,7 @@ func createTransmissionHandler(scheme, hostname string, port uint16, username, p
 				trPrefix, strconv.Quote(status), statusCount[status])
 		}
 
-		fmt.Fprintln(ctx, "# all torrents")
+		fmt.Fprintln(ctx, "\n# all torrents")
 
 		for i := range torrents {
 			writeTorrent(ctx, &torrents[i])
@@ -114,25 +109,17 @@ func writeTorrent(w io.Writer, t *transmissionrpc.Torrent) {
 	fmt.Fprintln(w, "# labels:", strings.Join(t.Labels, ", "))
 
 	if len(t.Labels) == 0 {
-		label := fmt.Sprintf("hash=%s", strconv.Quote(*t.HashString))
-
-		fmt.Fprintf(w, "%s_download_total{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-
-		fmt.Fprintf(w, "%s_upload_total{%s} %d\n", trPrefix, label, *t.UploadedEver)
+		label := fmt.Sprintf("hash=%s, status=%s", strconv.Quote(*t.HashString), strconv.Quote(t.Status.String()))
 
 		fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-
 		fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", trPrefix, label, *t.UploadedEver)
 	} else {
 		for _, label := range t.Labels {
-			label := fmt.Sprintf("label=%s, hash=%s", strconv.Quote(label), strconv.Quote(*t.HashString))
-
-			fmt.Fprintf(w, "%s_download_total{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-
-			fmt.Fprintf(w, "%s_upload_total{%s} %d\n", trPrefix, label, *t.UploadedEver)
+			fmt.Fprintln(w, "# label ", label)
+			label := fmt.Sprintf("label=%s, hash=%s, status=%s",
+				strconv.Quote(label), strconv.Quote(*t.HashString), strconv.Quote(t.Status.String()))
 
 			fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", trPrefix, label, *t.DownloadedEver)
-
 			fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", trPrefix, label, *t.UploadedEver)
 		}
 	}
@@ -148,13 +135,4 @@ func keys(m map[string]int64) []string {
 	sort.Strings(s)
 
 	return s
-}
-
-func increase(m map[string]int64, key string) map[string]int64 {
-	if m == nil {
-		m = make(map[string]int64)
-	}
-	m[key]++
-
-	return m
 }

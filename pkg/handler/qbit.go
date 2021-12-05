@@ -59,13 +59,13 @@ func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 
 		writeGlobalData(ctx, &d.ServerState, t)
 
-		torrents, err := rpc.Torrents()
-		if err != nil {
-			return errors.Wrap(err, "failed to get torrents")
-		}
+		// torrents, err := rpc.Torrents()
+		// if err != nil {
+		// 	return errors.Wrap(err, "failed to get torrents")
+		// }
 
-		for i := range torrents {
-			writeQBitTorrent(ctx, &torrents[i])
+		for hash := range d.Torrents {
+			writeQBitTorrent(ctx, hash, d.Torrents[hash])
 		}
 
 		return nil
@@ -97,26 +97,19 @@ func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Tra
 	fmt.Fprintf(w, "%s_average_queue_time_ms %d\n", qPrefix, s.AverageTimeQueue)
 }
 
-func writeQBitTorrent(w io.Writer, t *qbittorrent.Torrent) {
+func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(w, "# category:", t.Category)
 
+	var label string
 	if t.Category != "" {
-		fmt.Fprintf(w,
-			"%s_torrent_download_bytes{category=%s, hash=%s} %d\n",
-			qPrefix, strconv.Quote(t.Category), strconv.Quote(t.Hash), t.Downloaded)
-
-		fmt.Fprintf(w,
-			"%s_torrent_upload_bytes{category=%s, hash=%s} %d\n",
-			qPrefix, strconv.Quote(t.Category), strconv.Quote(t.Hash), t.Uploaded)
+		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
+			strconv.Quote(t.Category), strconv.Quote(hash), strconv.Quote(t.State))
 	} else {
-		fmt.Fprintf(w,
-			"%s_torrent_download_bytes{hash=%s} %d\n",
-			qPrefix, strconv.Quote(t.Hash), t.Downloaded)
-
-		fmt.Fprintf(w,
-			"%s_torrent_upload_bytes{hash=%s} %d\n",
-			qPrefix, strconv.Quote(t.Hash), t.Uploaded)
+		label = fmt.Sprintf("hash=%s, state=%s", strconv.Quote(hash), strconv.Quote(t.State))
 	}
+
+	fmt.Fprintf(w, "%s_torrent_download_bytes{%s} %d\n", qPrefix, label, t.Downloaded)
+	fmt.Fprintf(w, "%s_torrent_upload_bytes{%s} %d\n", qPrefix, label, t.Uploaded)
 }
