@@ -72,7 +72,7 @@ func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 	}
 }
 
-const qDefaultCategory = "uncategorized"
+const qDefaultCategory = "UN-CATEGORIZED"
 
 func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Transfer) {
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeUl))
