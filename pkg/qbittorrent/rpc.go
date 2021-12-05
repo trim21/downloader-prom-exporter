@@ -53,14 +53,23 @@ func (c *Client) Login(username string, password string) (loggedIn bool, err err
 }
 
 type Torrent struct {
-	// Hash       string `json:"hash"`
 	Name       string `json:"name"`
 	RawTags    string `json:"tags"`
 	Category   string `json:"category"`
 	State      string `json:"state"`
 	Uploaded   int64  `json:"uploaded"`
 	Downloaded int64  `json:"downloaded"`
+	// download bytes
+	Completed int64 `json:"completed"`
+	// total size bytes
+	Size int64 `json:"size"`
+	// rest need to download bytes
+	AmountLeft int64 `json:"amount_left"`
+	TotalSize  int64 `json:"total_size"`
+	Progress   int   `json:"progress"`
 }
+
+// Hash       string `json:"hash"`
 
 func (t Torrent) Tags() []string {
 	return utils.SplitByComma(t.RawTags)
@@ -127,8 +136,7 @@ type Transfer struct {
 func (c *Client) Transfer() (*Transfer, error) {
 	t := &Transfer{}
 
-	resp, err := c.h.R().SetResult(t).
-		Get("api/v2/transfer/info")
+	resp, err := c.h.R().SetResult(t).Get("api/v2/transfer/info")
 	if err != nil {
 		return nil, errors.Wrap(err, "can't connect to http daemon")
 	}
