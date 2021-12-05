@@ -72,6 +72,8 @@ func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 	}
 }
 
+const qDefaultCategory = "uncategorized"
+
 func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Transfer) {
 	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeUl))
 	fmt.Fprintf(w, "%s_upload_total_bytes %d\n\n", qPrefix, s.AllTimeUl)
@@ -107,7 +109,8 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
 			strconv.Quote(t.Category), strconv.Quote(hash), strconv.Quote(t.State))
 	} else {
-		label = fmt.Sprintf("hash=%s, state=%s", strconv.Quote(hash), strconv.Quote(t.State))
+		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
+			strconv.Quote(qDefaultCategory), strconv.Quote(hash), strconv.Quote(t.State))
 	}
 
 	fmt.Fprintf(w, "%s_torrent_todo_bytes{%s} %d\n", qPrefix, label, t.AmountLeft)
