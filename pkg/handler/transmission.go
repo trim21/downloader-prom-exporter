@@ -124,6 +124,7 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 		if statusErr != nil {
 			return statusErr
 		}
+
 		fmt.Fprintln(ctx, "# without label filter")
 		fmt.Fprintf(ctx, "transmission_download_all_total %d\n", status.CumulativeStats.DownloadedBytes)
 		fmt.Fprintf(ctx, "transmission_upload_all_total %d\n", status.CurrentStats.UploadedBytes)
