@@ -24,8 +24,7 @@ func setupTransmissionMetrics(router fiber.Router) {
 	}
 
 	var interval = 10 * time.Second
-	rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL")
-	if found {
+	if rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL"); found {
 		v, err := time.ParseDuration(rawInterval)
 		if err != nil || v <= 0 {
 			logrus.Errorf("can't parse '%s' as time.Duration, use default value %s", rawInterval, interval)
