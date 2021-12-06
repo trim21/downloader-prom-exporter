@@ -110,20 +110,19 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	}
 
 	var restUpload float64
+
 	switch t.State {
 	case qbittorrent.StateUploading, qbittorrent.StateStalledUploading, qbittorrent.StateDownloading:
-		if t.Ratio >= t.MaxRatio {
-			restUpload = float64(t.Downloaded) * (t.MaxRatio - t.Ratio)
-		} else {
-			restUpload = 0
+		v := t.MaxRatio - t.Ratio
+		if v > 0 {
+			restUpload = float64(t.Downloaded) * v
 		}
 	case qbittorrent.StateChecking, qbittorrent.StateMoving:
-		restUpload = float64(t.Size)*(t.MaxRatio-t.Ratio) - float64(t.Uploaded)
-		if restUpload <= 0 {
-			restUpload = 0
+		toUpload := float64(t.Size) * (t.MaxRatio - t.Ratio)
+		uploaded := float64(t.Uploaded)
+		if toUpload > uploaded {
+			restUpload = toUpload - uploaded
 		}
-	default:
-		restUpload = 0
 	}
 
 	fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} %.1f\n", label, restUpload)
