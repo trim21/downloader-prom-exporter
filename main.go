@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -39,6 +41,11 @@ func startHTTP() error {
 
 	handler.SetupRouter(app)
 	logrus.Infoln("start serer")
+
+	runtime.SetBlockProfileRate(1)
+	go func() {
+		log.Fatal(http.ListenAndServe(":6060", nil))
+	}()
 
 	return errors.Wrap(app.Listen(":80"), "failed to start http server")
 }

@@ -12,4 +12,5 @@ func SetupRouter(router fiber.Router) {
 	setupQBitMetrics(router)
 
 	router.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
+
 }

@@ -15,8 +15,6 @@ import (
 	"app/pkg/utils"
 )
 
-const qPrefix = "qbittorrent"
-
 func setupQBitMetrics(router fiber.Router) {
 	entryPoint, found := os.LookupEnv("QBIT_API_ENTRYPOINT")
 	if !found {
