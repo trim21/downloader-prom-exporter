@@ -93,8 +93,7 @@ func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Tra
 }
 
 func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
+	fmt.Fprintln(w, "\n# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(w, "# category:", t.Category)
 
 	var label string
