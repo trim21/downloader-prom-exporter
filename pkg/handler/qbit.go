@@ -100,10 +100,10 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	var label string
 	if t.Category != "" {
 		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
-			strconv.Quote(t.Category), strconv.Quote(hash), strconv.Quote(lessState(t.State)))
+			strconv.Quote(t.Category), strconv.Quote(hash), strconv.Quote(t.State))
 	} else {
 		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
-			strconv.Quote(qDefaultCategory), strconv.Quote(hash), strconv.Quote(lessState(t.State)))
+			strconv.Quote(qDefaultCategory), strconv.Quote(hash), strconv.Quote(t.State))
 	}
 
 	var restUpload float64
@@ -143,15 +143,4 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 
 	fmt.Fprintf(w, "qbittorrent_torrent_download_bytes{%s} %d\n", label, t.Downloaded)
 	fmt.Fprintf(w, "qbittorrent_torrent_upload_bytes{%s} %d\n", label, t.Uploaded)
-}
-
-func lessState(t string) string {
-	switch t {
-	case qbittorrent.StateStalledUploading:
-		return qbittorrent.StateUploading
-	case qbittorrent.StateStalledDownloading:
-		return qbittorrent.StateDownloading
-	default:
-		return t
-	}
 }
