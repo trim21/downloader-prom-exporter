@@ -116,14 +116,12 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	case qbittorrent.StateChecking, qbittorrent.StateMoving:
 		toUpload := float64(t.Size) * (t.MaxRatio - t.Ratio)
 		uploaded := float64(t.Uploaded)
-
 		if toUpload > uploaded {
 			restUpload = toUpload - uploaded
 		}
 	}
 
 	fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} %.1f\n", label, restUpload)
-
 	if t.State == qbittorrent.StateChecking {
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
 	} else {
@@ -131,10 +129,8 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	}
 
 	switch t.State {
-	case qbittorrent.StateStalledUploading,
-		qbittorrent.StateUploading,
-		qbittorrent.StateDownloading,
-		qbittorrent.StateStalledDownloading:
+	case qbittorrent.StateStalledUploading, qbittorrent.StateUploading,
+		qbittorrent.StateDownloading, qbittorrent.StateStalledDownloading:
 		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Size)
 	default:
 		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, 0)
