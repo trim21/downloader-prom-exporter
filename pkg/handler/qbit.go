@@ -98,7 +98,6 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(w, "# category:", t.Category)
-	fmt.Fprintln(w, "# super_seeding:", t.SuperSeeding)
 
 	var label string
 	if t.Category != "" {
@@ -120,6 +119,7 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	case qbittorrent.StateChecking, qbittorrent.StateMoving:
 		toUpload := float64(t.Size) * (t.MaxRatio - t.Ratio)
 		uploaded := float64(t.Uploaded)
+
 		if toUpload > uploaded {
 			restUpload = toUpload - uploaded
 		}
@@ -131,6 +131,16 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
 	} else {
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} %d\n", label, t.AmountLeft)
+	}
+
+	switch t.State {
+	case qbittorrent.StateStalledUploading,
+		qbittorrent.StateUploading,
+		qbittorrent.StateDownloading,
+		qbittorrent.StateStalledDownloading:
+		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Size)
+	default:
+		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, 0)
 	}
 
 	fmt.Fprintf(w, "qbittorrent_torrent_download_bytes{%s} %d\n", label, t.Downloaded)

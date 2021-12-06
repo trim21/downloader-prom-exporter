@@ -12,11 +12,14 @@ import (
 )
 
 const (
-	StateChecking         = "checkingUP"
-	StateMoving           = "moving"
+	StateChecking = "checkingUP"
+	StateMoving   = "moving"
+
 	StateUploading        = "uploading"
 	StateStalledUploading = "stalledUP"
-	StateDownloading      = "downloading"
+	
+	StateDownloading        = "downloading"
+	StateStalledDownloading = "stalledDL"
 )
 
 var ErrConnectToDaemon = errors.New("Can't finish http request")
