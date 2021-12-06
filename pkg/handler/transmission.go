@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/url"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -125,6 +124,8 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		statusMux.RLock()
 		if statusErr != nil {
+			statusMux.RUnlock()
+
 			return statusErr
 		}
 
@@ -134,6 +135,8 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 		statusMux.RUnlock()
 
 		torrentMux.RLock()
+		defer torrentMux.RUnlock()
+
 		if torrentsErr != nil {
 			return torrentsErr
 		}
@@ -143,18 +146,15 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 			statusCount[torrent.Status.String()]++
 		}
 
-		for _, status := range keys(statusCount) {
+		for status, value := range statusCount {
 			fmt.Fprintf(ctx, "transmission_download_all_count{status=%s} %d\n",
-				strconv.Quote(status), statusCount[status])
+				strconv.Quote(status), value)
 		}
 
 		fmt.Fprintln(ctx, "\n# all torrents")
-
 		for i := range torrents {
 			writeTorrent(ctx, &torrents[i])
 		}
-
-		torrentMux.RUnlock()
 
 		return nil
 	}
@@ -179,16 +179,4 @@ func writeTorrent(w io.Writer, t *transmissionrpc.Torrent) {
 			fmt.Fprintf(w, "transmission_torrent_upload_bytes{%s} %d\n", label, *t.UploadedEver)
 		}
 	}
-}
-
-func keys(m map[string]int64) []string {
-	s := make([]string, 0, len(m))
-
-	for label := range m {
-		s = append(s, label)
-	}
-
-	sort.Strings(s)
-
-	return s
 }
