@@ -122,9 +122,14 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	}
 
 	fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} %.1f\n", label, restUpload)
-	if t.State == qbittorrent.StateChecking {
+	switch t.State {
+	case qbittorrent.StateChecking:
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
-	} else {
+
+	case qbittorrent.StatePausedUploading, qbittorrent.StatePausedDownloading:
+		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
+
+	default:
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} %d\n", label, t.AmountLeft)
 	}
 

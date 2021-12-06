@@ -17,9 +17,12 @@ const (
 
 	StateUploading        = "uploading"
 	StateStalledUploading = "stalledUP"
-	
+
 	StateDownloading        = "downloading"
 	StateStalledDownloading = "stalledDL"
+
+	StatePausedUploading   = "pausedUP"
+	StatePausedDownloading = "pausedDL"
 )
 
 var ErrConnectToDaemon = errors.New("Can't finish http request")
