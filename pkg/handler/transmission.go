@@ -23,6 +23,18 @@ func setupTransmissionMetrics(router fiber.Router) {
 		return
 	}
 
+	var interval = 10 * time.Second
+	rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL")
+	if found {
+		v, err := time.ParseDuration(rawInterval)
+		if err != nil || v <= 0 {
+			logrus.Errorf("can't parse '%s' as time.Duration, use default value %s", rawInterval, interval)
+		} else {
+			logrus.Infof("set transmission update interval to '%s'", v)
+			interval = v
+		}
+	}
+
 	u, err := url.Parse(entryPoint)
 	if err != nil {
 		logrus.Fatalf("TRANSMISSION_API_ENTRYPOINT %s is not valid url", entryPoint)
@@ -63,11 +75,11 @@ func setupTransmissionMetrics(router fiber.Router) {
 
 	router.Get(
 		"/transmission/metrics",
-		createTransmissionHandler(client),
+		createTransmissionHandler(client, interval),
 	)
 }
 
-func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
+func createTransmissionHandler(client *transmissionrpc.Client, interval time.Duration) fiber.Handler {
 	var torrents []transmissionrpc.Torrent
 	var torrentMux sync.RWMutex
 	var torrentsErr error
@@ -110,13 +122,13 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 	statusFunc()
 
 	go func() {
-		for range time.NewTicker(time.Second * 5).C {
+		for range time.NewTicker(interval).C {
 			torrentFunc()
 		}
 	}()
 
 	go func() {
-		for range time.NewTicker(time.Second * 5).C {
+		for range time.NewTicker(interval).C {
 			statusFunc()
 		}
 	}()
