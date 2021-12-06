@@ -77,8 +77,10 @@ func createTransmissionHandler(client *transmissionrpc.Client) fiber.Handler {
 	var statusMux sync.RWMutex
 	var statusErr error
 
+	var torrentFields = []string{"hashString", "status", "name", "labels", "uploadedEver", "downloadedEver"}
+
 	var torrentFunc = func() {
-		if v, err := client.TorrentGetAll(context.TODO()); err != nil {
+		if v, err := client.TorrentGet(context.TODO(), torrentFields, nil); err != nil {
 			torrentMux.Lock()
 			torrentsErr = errors.Wrap(err, "failed to get torrents")
 			logrus.Errorln(torrentsErr)
