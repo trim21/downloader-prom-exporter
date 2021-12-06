@@ -12,8 +12,10 @@ import (
 )
 
 const (
-	StateChecking = "checkingUP"
-	StateMoving   = "moving"
+	StateCheckingUploading   = "checkingUP"
+	StateCheckingDownloading = "checkingDL"
+
+	StateMoving = "moving"
 
 	StateUploading        = "uploading"
 	StateStalledUploading = "stalledUP"
