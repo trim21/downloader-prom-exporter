@@ -11,6 +11,14 @@ import (
 	"app/pkg/utils"
 )
 
+const (
+	StateChecking         = "checkingUP"
+	StateMoving           = "moving"
+	StateUploading        = "uploading"
+	StateStalledUploading = "stalledUP"
+	StateDownloading      = "downloading"
+)
+
 var ErrConnectToDaemon = errors.New("Can't finish http request")
 
 // ErrBadResponse means that qbittorrent sent back an unexpected response.
@@ -64,7 +72,9 @@ type Torrent struct {
 	// rest need to download bytes
 	AmountLeft int64 `json:"amount_left"`
 
-	Size         int64   `json:"size"`
+	// selected size
+	Size int64 `json:"size"`
+	// torrent content total size
 	TotalSize    int64   `json:"total_size"`
 	Progress     float64 `json:"progress"`
 	SuperSeeding bool    `json:"super_seeding"`
