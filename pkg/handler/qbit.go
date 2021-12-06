@@ -147,9 +147,9 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 
 func lessState(t string) string {
 	switch t {
-	case qbittorrent.StateUploading, qbittorrent.StateStalledUploading:
+	case qbittorrent.StateStalledUploading:
 		return qbittorrent.StateUploading
-	case qbittorrent.StateStalledDownloading, qbittorrent.StateDownloading:
+	case qbittorrent.StateStalledDownloading:
 		return qbittorrent.StateDownloading
 	default:
 		return t
