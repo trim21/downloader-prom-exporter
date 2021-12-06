@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"runtime"
 	"strconv"
@@ -43,6 +44,7 @@ func startHTTP() error {
 	logrus.Infoln("start serer")
 
 	runtime.SetBlockProfileRate(1)
+
 	go func() {
 		log.Fatal(http.ListenAndServe(":6060", nil))
 	}()
