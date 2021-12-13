@@ -126,23 +126,19 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 		```
 	*/
 
-	v.Hostname, ok = getString(r, 0)
-	if !ok {
+	if v.Hostname, ok = getString(r, 0); !ok {
 		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'system.hostname'")
 	}
 
-	v.DownTotal, ok = getInt(r, 1)
-	if !ok {
+	if v.DownTotal, ok = getInt(r, 1); !ok {
 		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_down.total'")
 	}
 
-	v.UpTotal, ok = getInt(r, 2) //nolint:gomnd
-	if !ok {
+	if v.UpTotal, ok = getInt(r, 2); !ok { //nolint:gomnd
 		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_up.total'")
 	}
 
-	v.Torrents, err = parseTorrents(r[3])
-	if err != nil {
+	if v.Torrents, err = parseTorrents(r[3]); err != nil {
 		return nil, errors.Wrap(err, "failed to decode Torrents")
 	}
 

@@ -11,7 +11,7 @@ import (
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/sirupsen/logrus"
 
-	rtorrent2 "app/pkg/rtorrent"
+	rt "app/pkg/rtorrent"
 )
 
 func setupRTorrentMetrics(router fiber.Router) {
@@ -28,7 +28,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 	rpc := xmlrpc.NewClient(entryPoint, true)
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
-		v, err := rtorrent2.GetGlobalData(rpc)
+		v, err := rt.GetGlobalData(rpc)
 		if err != nil {
 			return err
 		}
@@ -44,7 +44,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 	})
 }
 
-func writeRtorrentTorrent(w io.Writer, t *rtorrent2.Torrent) {
+func writeRtorrentTorrent(w io.Writer, t *rt.Torrent) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
 	fmt.Fprintln(w, "# label:", t.Label)
