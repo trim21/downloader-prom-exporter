@@ -17,6 +17,9 @@ const (
 
 	StateMoving = "moving"
 
+	StateForceUploading   = "forcedUP"
+	StateForceDownloading = "forcedDL"
+
 	StateUploading        = "uploading"
 	StateStalledUploading = "stalledUP"
 
