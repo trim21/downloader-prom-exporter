@@ -126,7 +126,7 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 	case qbittorrent.StateCheckingUploading:
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
 
-	case qbittorrent.StatePausedUploading, qbittorrent.StatePausedDownloading:
+	case qbittorrent.StatePausedUploading, qbittorrent.StatePausedDownloading, qbittorrent.StateForceDownloading:
 		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
 
 	default:
@@ -135,9 +135,11 @@ func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
 
 	switch t.State {
 	case qbittorrent.StateStalledUploading, qbittorrent.StateUploading,
-		qbittorrent.StateDownloading, qbittorrent.StateStalledDownloading,
 		qbittorrent.StateForceUploading:
 		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Size)
+	case qbittorrent.StateDownloading, qbittorrent.StateStalledDownloading,
+		qbittorrent.StateForceDownloading:
+		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Downloaded)
 	default:
 		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, 0)
 	}
