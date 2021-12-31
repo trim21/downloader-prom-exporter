@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/adaptor/v2 v2.1.15
-	github.com/gofiber/fiber/v2 v2.23.0
+	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
 	github.com/mrobinsn/go-rtorrent v1.7.0
 	github.com/pkg/errors v0.9.1
