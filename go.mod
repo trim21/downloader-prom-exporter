@@ -7,7 +7,7 @@ require (
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
-	github.com/mrobinsn/go-rtorrent v1.7.0
+	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
