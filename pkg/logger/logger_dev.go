@@ -14,6 +14,7 @@
 package logger
 
 import (
+	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -14,18 +13,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"app/pkg/logger"
-	"app/pkg/utils"
 )
 
-func setupTransmissionMetrics(router fiber.Router) {
-	entryPoint, found := os.LookupEnv("TRANSMISSION_API_ENTRYPOINT")
-	if !found {
+func setupTransmissionMetrics(client *transmissionrpc.Client, router fiber.Router) {
+	if client == nil {
 		return
 	}
-
 	var interval = 10 * time.Second
 	if rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL"); found {
 		v, err := time.ParseDuration(rawInterval)
@@ -36,22 +31,6 @@ func setupTransmissionMetrics(router fiber.Router) {
 			logger.Sugar().Infof("set transmission update interval to '%s'", v)
 			interval = v
 		}
-	}
-
-	u, err := url.Parse(entryPoint)
-	if err != nil {
-		logger.WithE(err).Fatal("TRANSMISSION_API_ENTRYPOINT is not valid url", zap.String("value", entryPoint))
-	}
-
-	username, password := utils.GetUserPass(u.User)
-	port := utils.GetPort(u)
-
-	client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
-		HTTPS: u.Scheme == "https",
-		Port:  port,
-	})
-	if err != nil {
-		logger.Fatal("failed to create transmission client")
 	}
 
 	router.Get("/transmission/metrics", createTransmissionHandler(client, interval))
@@ -65,7 +44,8 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 
 	var torrentFields = []string{"hashString", "status", "name", "labels", "uploadedEver", "downloadedEver"}
 	var torrentFunc = func() {
-		v, err := client.TorrentGet(context.TODO(), torrentFields, nil)
+		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		v, err := client.TorrentGet(ctx, torrentFields, nil)
 		torrentMux.Lock()
 		defer torrentMux.Unlock()
 		if err != nil {
@@ -78,7 +58,8 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 	}
 
 	var statusFunc = func() {
-		v, err := client.SessionStats(context.TODO())
+		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		v, err := client.SessionStats(ctx)
 		statusMux.Lock()
 		defer statusMux.Unlock()
 		if err != nil {

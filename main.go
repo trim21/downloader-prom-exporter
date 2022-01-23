@@ -1,58 +1,35 @@
 package main
 
 import (
-	"log"
-	"math/rand"
-	"os"
-	"strconv"
-	"strings"
-	"time"
+	"go.uber.org/fx"
 
-	"github.com/gofiber/fiber/v2"
-	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/pkg/errors"
-
-	"app/pkg/handler"
+	"app/cron"
 	"app/pkg/logger"
+	"app/pkg/transmission"
+	"app/web"
 )
 
-func startHTTP() error {
-	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
-		StrictRouting:         true,
-		CaseSensitive:         true,
-		GETOnly:               false,
-	})
-
-	app.Use(fiberLogger.New(fiberLogger.Config{
-		Format:       _format(),
-		TimeFormat:   time.RFC3339,
-		TimeInterval: time.Second,
-		Output:       os.Stdout,
-	}))
-
-	handler.SetupRouter(app)
-	logger.Info("start serer")
-
-	return errors.Wrap(app.Listen(":80"), "failed to start http server")
-}
-
-func _format() string {
-	format := strings.Join([]string{
-		strconv.Quote("time") + `: "${time}"`,
-		(strconv.Quote("status")) + `: ${status}`,
-		(strconv.Quote("method")) + `: "${method}"`,
-		(strconv.Quote("latency")) + `: "${latency}"`,
-		(strconv.Quote("path")) + `: "${path}"`,
-	}, ", ")
-
-	format = "{" + format + "}\n"
-
-	return format
-}
-
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	var c *cron.C
+	var w web.S
+	err := fx.New(
+		fx.Provide(transmission.New),
+		fx.Provide(cron.New),
+		fx.Provide(web.New),
+		fx.Populate(&c),
+		fx.Populate(&w),
+		fx.NopLogger,
+	).Err()
+	if err != nil {
+		logger.WithE(err).Fatal("dependency inject")
+	}
 
-	log.Fatalln(startHTTP())
+	go c.Run()
+	go func() {
+		if err := w.Start(); err != nil {
+			logger.WithE(err).Fatal("failed to start HTTP server")
+		}
+	}()
+
+	select {}
 }
