@@ -9,8 +9,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
+	"app/pkg/logger"
 	rt "app/pkg/rtorrent"
 )
 
@@ -22,12 +23,13 @@ func setupRTorrentMetrics(router fiber.Router) {
 
 	_, err := url.Parse(entryPoint)
 	if err != nil {
-		logrus.Fatalf("can't parse RTORRENT_API_ENTRYPOINT %s", entryPoint)
+		logger.Fatal("can't parse RTORRENT_API_ENTRYPOINT", zap.String("value", entryPoint))
 	}
 
 	rpc := xmlrpc.NewClient(entryPoint, true)
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
+		logger.Info("export rtorrent metrics")
 		v, err := rt.GetGlobalData(rpc)
 		if err != nil {
 			return err

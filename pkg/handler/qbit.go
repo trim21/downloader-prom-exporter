@@ -9,8 +9,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
+	"app/pkg/logger"
 	"app/pkg/qbittorrent"
 	"app/pkg/utils"
 )
@@ -23,12 +24,12 @@ func setupQBitMetrics(router fiber.Router) {
 
 	u, err := url.Parse(entryPoint)
 	if err != nil {
-		logrus.Fatalf("can't parse QBIT_API_ENTRYPOINT %s", entryPoint)
+		logger.Fatal("can't parse QBIT_API_ENTRYPOINT", zap.String("value", entryPoint))
 	}
 
 	rpc, err := qbittorrent.NewClient(u)
 	if err != nil {
-		logrus.Fatalln(err)
+		logger.WithE(err).Fatal("failed to create qbittorrent rpc client")
 	}
 
 	router.Get("/qbit/metrics", createQbitHandler(rpc))
@@ -36,6 +37,7 @@ func setupQBitMetrics(router fiber.Router) {
 
 func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		logger.Info("export qbittorrent metrics")
 		success, err := rpc.Login("", "")
 		if err != nil {
 			return errors.Wrap(err, "failed to login")

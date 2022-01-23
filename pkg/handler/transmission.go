@@ -14,8 +14,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
+	"app/pkg/logger"
 	"app/pkg/utils"
 )
 
@@ -29,16 +30,17 @@ func setupTransmissionMetrics(router fiber.Router) {
 	if rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL"); found {
 		v, err := time.ParseDuration(rawInterval)
 		if err != nil || v <= 0 {
-			logrus.Errorf("can't parse '%s' as time.Duration, use default value %s", rawInterval, interval)
+			logger.WithE(err).Sugar().Warnf(
+				"can't parse '%s' as time.Duration, use default value %s", rawInterval, interval)
 		} else {
-			logrus.Infof("set transmission update interval to '%s'", v)
+			logger.Sugar().Infof("set transmission update interval to '%s'", v)
 			interval = v
 		}
 	}
 
 	u, err := url.Parse(entryPoint)
 	if err != nil {
-		logrus.Fatalf("TRANSMISSION_API_ENTRYPOINT %s is not valid url", entryPoint)
+		logger.WithE(err).Fatal("TRANSMISSION_API_ENTRYPOINT is not valid url", zap.String("value", entryPoint))
 	}
 
 	username, password := utils.GetUserPass(u.User)
@@ -49,7 +51,7 @@ func setupTransmissionMetrics(router fiber.Router) {
 		Port:  port,
 	})
 	if err != nil {
-		logrus.Fatalln("failed to create transmission client")
+		logger.Fatal("failed to create transmission client")
 	}
 
 	router.Get("/transmission/metrics", createTransmissionHandler(client, interval))
@@ -68,7 +70,7 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 		defer torrentMux.Unlock()
 		if err != nil {
 			torrentsErr = errors.Wrap(err, "failed to get torrents")
-			logrus.Errorln(torrentsErr)
+			logger.WithE(torrentsErr).Error("failed to get torrents")
 		} else {
 			torrentsErr = nil
 			torrents = v
@@ -81,17 +83,20 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 		defer statusMux.Unlock()
 		if err != nil {
 			statusErr = errors.Wrap(err, "failed to get session stats")
-			logrus.Errorln(statusErr)
+			logger.WithE(statusErr).Error("failed to get session stats")
 		} else {
 			statusErr = nil
 			status = v
 		}
 	}
 
+	logger.Info("start fetching transmission torrent details")
 	go runInBackground(interval, torrentFunc)
+	logger.Info("start fetching transmission global data")
 	go runInBackground(interval, statusFunc)
 
 	return func(ctx *fiber.Ctx) error {
+		logger.Info("export transmission metrics")
 		statusMux.RLock()
 		if statusErr != nil {
 			statusMux.RUnlock()

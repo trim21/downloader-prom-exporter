@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
+	"app/pkg/logger"
 	"app/pkg/utils"
 )
 
@@ -108,7 +108,7 @@ func (c *Client) Torrents() ([]Torrent, error) {
 	}
 
 	if resp.StatusCode() >= 300 {
-		logrus.Debugln(resp.String())
+		logger.Debug(resp.String())
 
 		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
 	}
@@ -183,7 +183,7 @@ func (c *Client) MainData() (*MainData, error) {
 	}
 
 	if resp.StatusCode() >= 300 {
-		logrus.Debugln(resp.String())
+		logger.Debug(resp.String())
 
 		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
 	}

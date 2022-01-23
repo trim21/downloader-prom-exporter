@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"app/pkg/handler"
+	"app/pkg/logger"
 )
 
 func startHTTP() error {
@@ -24,21 +24,15 @@ func startHTTP() error {
 		GETOnly:               false,
 	})
 
-	app.Use(logger.New(logger.Config{
+	app.Use(fiberLogger.New(fiberLogger.Config{
 		Format:       _format(),
 		TimeFormat:   time.RFC3339,
 		TimeInterval: time.Second,
 		Output:       os.Stdout,
 	}))
 
-	app.Get("/test", func(ctx *fiber.Ctx) error {
-		logrus.Infoln("test")
-
-		return ctx.SendString("test")
-	})
-
 	handler.SetupRouter(app)
-	logrus.Infoln("start serer")
+	logger.Info("start serer")
 
 	return errors.Wrap(app.Listen(":80"), "failed to start http server")
 }
@@ -46,13 +40,9 @@ func startHTTP() error {
 func _format() string {
 	format := strings.Join([]string{
 		strconv.Quote("time") + `: "${time}"`,
-
 		(strconv.Quote("status")) + `: ${status}`,
-
 		(strconv.Quote("method")) + `: "${method}"`,
-
 		(strconv.Quote("latency")) + `: "${latency}"`,
-
 		(strconv.Quote("path")) + `: "${path}"`,
 	}, ", ")
 
@@ -62,35 +52,6 @@ func _format() string {
 }
 
 func main() {
-	logrus.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:   time.RFC3339,
-		DisableHTMLEscape: true,
-		DataKey:           "data",
-	})
-
-	logrus.SetLevel(logrus.InfoLevel)
-
-	envVal := os.Getenv("production")
-	if envVal != "" {
-		prod, err := strconv.ParseBool(envVal)
-		if err != nil {
-			logrus.Errorf(`can't parse "%s" as bool`, envVal)
-		} else if !prod {
-			logrus.SetLevel(logrus.DebugLevel)
-			logrus.SetFormatter(&logrus.TextFormatter{
-				TimestampFormat:  "15:04:05 Z07:00",
-				ForceColors:      true,
-				ForceQuote:       true,
-				FullTimestamp:    true,
-				SortingFunc:      nil,
-				PadLevelText:     true,
-				FieldMap:         nil,
-				CallerPrettyfier: nil,
-			})
-			logrus.Debugln("set log level to debug")
-		}
-	}
-
 	rand.Seed(time.Now().UnixNano())
 
 	log.Fatalln(startHTTP())
