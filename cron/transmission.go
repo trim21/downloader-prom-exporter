@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/go-resty/resty/v2"
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/robfig/cron/v3"
@@ -104,20 +105,25 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 	r := resty.New()
 	var trackers *strset.Set
 
-	updateTrackers := func() {
+	updateTrackers := func() error {
 		logger.Info("update latest trackers")
 		v, err := getTrackers(r)
 		if err != nil {
 			logger.WithE(err).Error("failed to get latest trackers")
-			return
+			return err
 		}
 		mux.Lock()
 		trackers = v
 		mux.Unlock()
-	}
-	updateTrackers()
 
-	if _, err := c.AddFunc("*/10 * * * *", updateTrackers); err != nil {
+		return nil
+	}
+
+	retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second))
+
+	if _, err := c.AddFunc("0 * * * *", func() {
+		retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second))
+	}); err != nil {
 		return errgo.Wrap(err, "tracker updater")
 	}
 
@@ -125,7 +131,7 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		torrents, err := rpc.TorrentGet(ctx,
-			[]string{"id", "downloadDir", "labelConfig", "name", "hashString", "trackers"}, nil)
+			[]string{"id", "downloadDir", "labels", "name", "hashString", "trackers"}, nil)
 		if err != nil {
 			logger.WithE(err).Error("failed to get torrent list")
 			return
