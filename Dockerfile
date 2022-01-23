@@ -1,7 +1,5 @@
-FROM alpine
+FROM gcr.io/distroless/base
 
-ENV production=1
+COPY dist/app /app/my-site-proxy
 
-COPY dist/app /work/my-site-proxy
-
-ENTRYPOINT ["/work/my-site-proxy"]
+ENTRYPOINT ["/app/my-site-proxy"]

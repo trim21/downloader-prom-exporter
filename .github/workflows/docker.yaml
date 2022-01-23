@@ -28,8 +28,6 @@ jobs:
       - run: go get ./...
 
       - run: go build -o dist/app
-        env:
-          CGO_ENABLED: 0
 
       - run: docker build -t ghcr.io/trim21/my-site-proxy:latest .
 
