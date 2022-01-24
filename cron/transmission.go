@@ -65,6 +65,7 @@ func processLabels(rpc *transmissionrpc.Client, torrent transmissionrpc.Torrent)
 
 	if err != nil {
 		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Any("payload", payload))
+
 		return errgo.Wrap(err, "rpc")
 	}
 
@@ -105,7 +106,8 @@ func processTracker(
 	err := rpc.TorrentSet(ctx, payload)
 
 	if err != nil {
-		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Any("payload", payload))
+		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Reflect("payload", payload))
+
 		return errgo.Wrap(err, "rpc")
 	}
 
@@ -195,10 +197,8 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 
 		if u, err := url.Parse(v); err != nil {
 			continue
-		} else {
-			if u.Scheme == "wss" || u.Scheme == "ws" {
-				continue
-			}
+		} else if u.Scheme == "wss" || u.Scheme == "ws" {
+			continue
 		}
 
 		if !trackerShouldRemove.Has(v) {
