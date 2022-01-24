@@ -22,15 +22,16 @@ import (
 // development log config.
 func getLogger() *zap.Logger { //nolint:ireturn
 	consoleEncoding := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
-		TimeKey:        timeKey,
-		NameKey:        nameKey,
-		MessageKey:     messageKey,
-		CallerKey:      callerKey,
-		LevelKey:       levelKey,
-		StacktraceKey:  traceKey,
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseColorLevelEncoder,
-		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"),
+		TimeKey:       timeKey,
+		NameKey:       nameKey,
+		MessageKey:    messageKey,
+		CallerKey:     callerKey,
+		LevelKey:      levelKey,
+		StacktraceKey: traceKey,
+		LineEnding:    zapcore.DefaultLineEnding,
+		EncodeLevel:   zapcore.LowercaseColorLevelEncoder,
+		EncodeTime:    zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"),
+		// EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.MillisDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	})
