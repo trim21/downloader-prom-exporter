@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -57,10 +58,17 @@ func processLabels(rpc *transmissionrpc.Client, torrent transmissionrpc.Torrent)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	err := rpc.TorrentSet(ctx,
-		transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, Labels: expected.List()})
 
-	return errgo.Wrap(err, "rpc")
+	payload := transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, Labels: expected.List()}
+
+	err := rpc.TorrentSet(ctx, payload)
+
+	if err != nil {
+		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Any("payload", payload))
+		return errgo.Wrap(err, "rpc")
+	}
+
+	return nil
 }
 
 func processTracker(
@@ -92,10 +100,16 @@ func processTracker(
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	err := rpc.TorrentSet(ctx,
-		transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, TrackerAdd: trackersToAdd.List()})
 
-	return errgo.Wrap(err, "rpc")
+	payload := transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, TrackerAdd: trackersToAdd.List()}
+	err := rpc.TorrentSet(ctx, payload)
+
+	if err != nil {
+		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Any("payload", payload))
+		return errgo.Wrap(err, "rpc")
+	}
+
+	return nil
 }
 
 func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
@@ -178,6 +192,15 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 		if v == "" {
 			continue
 		}
+
+		if u, err := url.Parse(v); err != nil {
+			continue
+		} else {
+			if u.Scheme == "wss" || u.Scheme == "ws" {
+				continue
+			}
+		}
+
 		if !trackerShouldRemove.Has(v) {
 			trackers.Add(v)
 		}
