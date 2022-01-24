@@ -51,7 +51,6 @@ func processLabels(rpc *transmissionrpc.Client, torrent transmissionrpc.Torrent)
 	}
 
 	var expected = strset.Union(strset.Difference(currentLabels, managedLabels), labelExpected)
-
 	if expected.IsEqual(currentLabels) {
 		return nil
 	}
@@ -60,10 +59,7 @@ func processLabels(rpc *transmissionrpc.Client, torrent transmissionrpc.Torrent)
 	defer cancel()
 
 	payload := transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, Labels: expected.List()}
-
-	err := rpc.TorrentSet(ctx, payload)
-
-	if err != nil {
+	if err := rpc.TorrentSet(ctx, payload); err != nil {
 		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Any("payload", payload))
 
 		return errgo.Wrap(err, "rpc")
@@ -103,9 +99,7 @@ func processTracker(
 	defer cancel()
 
 	payload := transmissionrpc.TorrentSetPayload{IDs: []int64{*torrent.ID}, TrackerAdd: trackersToAdd.List()}
-	err := rpc.TorrentSet(ctx, payload)
-
-	if err != nil {
+	if err := rpc.TorrentSet(ctx, payload); err != nil {
 		logger.Error("rpc payload", zap.Stringp("name", torrent.Name), zap.Reflect("payload", payload))
 
 		return errgo.Wrap(err, "rpc")
