@@ -133,10 +133,14 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 		return nil
 	}
 
-	retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second))
+	if err := retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second)); err != nil {
+		logger.WithE(err).Error("failed to update trackers after retries")
+	}
 
 	if _, err := c.AddFunc("0 * * * *", func() {
-		retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second))
+		if err := retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second)); err != nil {
+			logger.WithE(err).Error("failed to update trackers after retries")
+		}
 	}); err != nil {
 		return errgo.Wrap(err, "adding tracker updater")
 	}
@@ -148,6 +152,7 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 			[]string{"id", "downloadDir", "labels", "name", "hashString", "trackers"}, nil)
 		if err != nil {
 			logger.WithE(err).Error("failed to get torrent list")
+
 			return
 		}
 
@@ -186,17 +191,8 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 	trackers := strset.NewWithSize(200)
 	for scanner.Scan() {
 		v := scanner.Text()
-		if v == "" {
-			continue
-		}
 
-		if u, err := url.Parse(v); err != nil {
-			continue
-		} else if u.Scheme == "wss" || u.Scheme == "ws" {
-			continue
-		}
-
-		if !trackerShouldRemove.Has(v) {
+		if shouldAdd(v) {
 			trackers.Add(v)
 		}
 	}
@@ -210,6 +206,25 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 	return trackers, nil
 }
 
+func shouldAdd(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	if u, err := url.Parse(s); err != nil {
+		return false
+	} else if u.Scheme == "wss" || u.Scheme == "ws" {
+		return false
+	}
+
+	if trackerShouldRemove.Has(s) {
+		return false
+	}
+
+	return true
+}
+
+//nolint:gochecknoglobals
 var trackerShouldRemove = strset.New(
 	// only allow authorized info hash
 	"http://bt.beatrice-raws.org/announce",

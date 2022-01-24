@@ -216,6 +216,7 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    - gomnd
     - wsl # noisy
     - exhaustivestruct
     - gofumpt # break import grouping
@@ -227,6 +228,7 @@ linters:
     - maligned
     - interfacer
     - varnamelen
+    - cyclop
   fast: false
 
 issues:

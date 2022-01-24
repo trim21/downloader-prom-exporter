@@ -3,6 +3,7 @@ module app
 go 1.17
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.25.0
@@ -12,6 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899
 	github.com/scylladb/go-set v1.0.2
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/fx v1.16.0
@@ -20,7 +22,6 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
-	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

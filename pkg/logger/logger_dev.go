@@ -20,7 +20,7 @@ import (
 )
 
 // development log config.
-func getLogger() *zap.Logger { //nolint:ireturn
+func getLogger() *zap.Logger {
 	consoleEncoding := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
 		TimeKey:        timeKey,
 		NameKey:        nameKey,

@@ -71,9 +71,9 @@ func parseTorrents(results interface{}) ([]Torrent, error) {
 
 type MainData struct {
 	Hostname  string
+	Torrents  []Torrent
 	UpTotal   int
 	DownTotal int
-	Torrents  []Torrent
 }
 
 type call struct {
@@ -145,7 +145,7 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 	return v, nil
 }
 
-// get first value from [][]interface{} as string
+// get first value from [][]interface{} as string.
 func getString(r []interface{}, index int) (string, bool) {
 	vv, ok := r[index].([]interface{})
 	if !ok {
@@ -157,7 +157,7 @@ func getString(r []interface{}, index int) (string, bool) {
 	return v, ok
 }
 
-// get first value from [][]interface{} as int
+// get first value from [][]interface{} as int.
 func getInt(r []interface{}, index int) (int, bool) {
 	vv, ok := r[index].([]interface{})
 	if !ok {

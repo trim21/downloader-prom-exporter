@@ -21,7 +21,7 @@ import (
 )
 
 // production log config.
-func getLogger() *zap.Logger { //nolint:ireturn
+func getLogger() *zap.Logger {
 	prod := zapcore.EncoderConfig{
 		TimeKey:        timeKey,
 		NameKey:        nameKey,

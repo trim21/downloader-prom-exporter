@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"app/pkg/logger"
@@ -32,7 +33,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 		logger.Debug("export rtorrent metrics")
 		v, err := rt.GetGlobalData(rpc)
 		if err != nil {
-			return err
+			return errors.WithMessage(err, "rpc")
 		}
 
 		fmt.Fprintf(ctx, "rtorrent_upload_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.UpTotal)
