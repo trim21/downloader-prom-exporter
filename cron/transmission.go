@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -79,6 +80,7 @@ func processTracker(
 		if !currentTrackers.Has(tracker) {
 			trackersToAdd.Add(tracker)
 		}
+
 		return true
 	})
 	m.RUnlock()
@@ -115,6 +117,7 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 		mux.Lock()
 		trackers = v
 		mux.Unlock()
+		logger.Info("latest trackers updated")
 
 		return nil
 	}
@@ -124,7 +127,7 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 	if _, err := c.AddFunc("0 * * * *", func() {
 		retry.Do(updateTrackers, retry.Attempts(5), retry.Delay(time.Second))
 	}); err != nil {
-		return errgo.Wrap(err, "tracker updater")
+		return errgo.Wrap(err, "adding tracker updater")
 	}
 
 	_, err := c.AddFunc("* * * * *", func() {
@@ -163,6 +166,10 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 	if err != nil {
 		return nil, errgo.Wrap(err, "failed to fetch latest tracker list")
 	}
+	if res.StatusCode() > 300 {
+		return nil, errgo.Wrap(err,
+			fmt.Sprintf("failed to fetch latest tracker list, http code %d", res.StatusCode()))
+	}
 
 	scanner := bufio.NewScanner(bytes.NewBuffer(res.Body()))
 	trackers := strset.NewWithSize(200)
@@ -171,7 +178,7 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 		if v == "" {
 			continue
 		}
-		if !shouldRemove(v) {
+		if !trackerShouldRemove.Has(v) {
 			trackers.Add(v)
 		}
 	}
@@ -180,42 +187,38 @@ func getTrackers(client *resty.Client) (*strset.Set, error) {
 		return nil, errgo.Wrap(err, "scan")
 	}
 
+	logger.Sugar().Infof("updated trackers with lenth %d", trackers.Size())
+
 	return trackers, nil
 }
 
-func shouldRemove(s string) bool {
-	_, ok := trackerShouldRemove[s]
-
-	return !ok
-}
-
-var trackerShouldRemove = map[string]struct{}{
+var trackerShouldRemove = strset.New(
 	// only allow authorized info hash
-	"http://bt.beatrice-raws.org/announce":             {},
-	"http://nyaa.tracker.wf:7777/announce":             {},
-	"http://open.touki.ru/announce.php":                {},
-	"http://sukebei.tracker.wf:8888/announce":          {},
-	"http://torrent.arjlover.net:2710/announce":        {},
-	"http://torrent.resonatingmedia.com:6969/announce": {},
-	"http://torrents.hikarinokiseki.com:6969/announce": {},
-	"http://tracker.gcvchp.com:2710/announce":          {},
-	"http://tracker.minglong.org:8080/announce":        {},
-	"http://tracker.pussytorrents.org:3000/announce":   {},
-	"http://tracker.tasvideos.org:6969/announce":       {},
-	"http://www.tribalmixes.com/announce.php":          {},
-	"https://torrent.ubuntu.com/announce":              {},
-	"udp://anidex.moe:6969/announce":                   {},
+	"http://bt.beatrice-raws.org/announce",
+	"http://nyaa.tracker.wf:7777/announce",
+	"http://open.touki.ru/announce.php",
+	"http://sukebei.tracker.wf:8888/announce",
+	"http://torrent.arjlover.net:2710/announce",
+	"http://torrent.resonatingmedia.com:6969/announce",
+	"http://torrents.hikarinokiseki.com:6969/announce",
+	"http://tracker.gcvchp.com:2710/announce",
+	"http://tracker.minglong.org:8080/announce",
+	"http://tracker.pussytorrents.org:3000/announce",
+	"http://tracker.tasvideos.org:6969/announce",
+	"http://www.tribalmixes.com/announce.php",
+	"https://torrent.ubuntu.com/announce",
+	"udp://anidex.moe:6969/announce",
 
 	// cloudflare access deny
-	"http://104.28.16.69/announce":             {},
-	"https://tracker.shittyurl.org/announce":   {},
-	"https://tracker.nitrix.me/announce":       {},
-	"https://tracker.lilithraws.cf/announce":   {},
-	"https://tracker.nanoha.org/announce":      {},
-	"http://www.xwt-classics.net/announce.php": {},
-	"http://torrentsmd.com:8080/announce":      {},
+	"http://104.28.16.69/announce",
+	"https://tracker.shittyurl.org/announce",
+	"https://tracker.nitrix.me/announce",
+	"https://tracker.lilithraws.cf/announce",
+	"https://tracker.nanoha.org/announce",
+	"http://www.xwt-classics.net/announce.php",
+	"http://torrentsmd.com:8080/announce",
 	// bot verify??
-	"https://tracker.parrotsec.org/announce": {},
+	"https://tracker.parrotsec.org/announce",
 	// 404
-	"http://baibako.tv/announce": {},
-}
+	"http://baibako.tv/announce",
+)
