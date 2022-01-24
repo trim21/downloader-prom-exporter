@@ -108,6 +108,11 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 
 func runInBackground(interval time.Duration, f func()) {
 	f()
+
+	// wait for even time to start looping
+	i := int64(interval)
+	<-time.After(time.Duration(i - (time.Now().UnixNano() % i)))
+
 	for range time.NewTicker(interval).C {
 		f()
 	}

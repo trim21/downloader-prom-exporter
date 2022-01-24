@@ -18,7 +18,7 @@ func (c *C) Run() {
 
 func New(tr *transmissionrpc.Client) (*C, error) {
 	logger.Info("creating cron manager")
-	c := cron.New(cron.WithLogger(cron.DefaultLogger))
+	c := cron.New()
 
 	if err := setupTransmissionMetrics(tr, c); err != nil {
 		return nil, errgo.Wrap(err, "cron")
