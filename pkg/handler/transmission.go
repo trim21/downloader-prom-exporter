@@ -79,7 +79,7 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 	go runInBackground(interval, statusFunc)
 
 	return func(ctx *fiber.Ctx) error {
-		logger.Info("export transmission metrics")
+		logger.Debug("export transmission metrics")
 		statusMux.RLock()
 		if statusErr != nil {
 			statusMux.RUnlock()

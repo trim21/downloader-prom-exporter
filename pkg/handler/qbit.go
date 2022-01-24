@@ -37,7 +37,7 @@ func setupQBitMetrics(router fiber.Router) {
 
 func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		logger.Info("export qbittorrent metrics")
+		logger.Debug("export qbittorrent metrics")
 		success, err := rpc.Login("", "")
 		if err != nil {
 			return errors.Wrap(err, "failed to login")

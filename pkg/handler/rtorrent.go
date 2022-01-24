@@ -29,7 +29,7 @@ func setupRTorrentMetrics(router fiber.Router) {
 	rpc := xmlrpc.NewClient(entryPoint, true)
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
-		logger.Info("export rtorrent metrics")
+		logger.Debug("export rtorrent metrics")
 		v, err := rt.GetGlobalData(rpc)
 		if err != nil {
 			return err
