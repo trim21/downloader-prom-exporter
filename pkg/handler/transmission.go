@@ -44,13 +44,14 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 
 	var torrentFields = []string{"hashString", "status", "name", "labels", "uploadedEver", "downloadedEver"}
 	var torrentFunc = func() {
-		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 		v, err := client.TorrentGet(ctx, torrentFields, nil)
 		torrentMux.Lock()
 		defer torrentMux.Unlock()
 		if err != nil {
 			torrentsErr = errors.Wrap(err, "failed to get torrents")
-			logger.WithE(torrentsErr).Error("failed to get torrents")
+			logger.WithE(err).Error("failed to get torrents")
 		} else {
 			torrentsErr = nil
 			torrents = v
@@ -58,13 +59,14 @@ func createTransmissionHandler(client *transmissionrpc.Client, interval time.Dur
 	}
 
 	var statusFunc = func() {
-		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 		v, err := client.SessionStats(ctx)
 		statusMux.Lock()
 		defer statusMux.Unlock()
 		if err != nil {
 			statusErr = errors.Wrap(err, "failed to get session stats")
-			logger.WithE(statusErr).Error("failed to get session stats")
+			logger.WithE(err).Error("failed to get session stats")
 		} else {
 			statusErr = nil
 			status = v
