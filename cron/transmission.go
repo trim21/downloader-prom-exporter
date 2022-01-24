@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/avast/retry-go/v3"
+	"github.com/avast/retry-go/v4"
 	"github.com/go-resty/resty/v2"
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/robfig/cron/v3"
