@@ -35,7 +35,7 @@ func setup() *zap.Logger {
 
 // Named create a named logger.
 func Named(name string) *zap.Logger {
-	return log.Named(name)
+	return log.Named(name).WithOptions(zap.AddCallerSkip(-1))
 }
 
 // Debug level logging.
@@ -60,7 +60,7 @@ func Error(msg string, fields ...zapcore.Field) {
 
 // WithE is a shortcut for `logger.With(zap.Error(err))`.
 func WithE(err error) *zap.Logger {
-	return log.With(zap.Error(err))
+	return log.With(zap.Error(err)).WithOptions(zap.AddCallerSkip(-1))
 }
 
 // With return a logger with common fields.
@@ -85,5 +85,5 @@ func Fatal(msg string, fields ...zapcore.Field) {
 
 // Sugar return a zap.SugaredLogger.
 func Sugar() *zap.SugaredLogger {
-	return log.Sugar()
+	return log.WithOptions(zap.AddCallerSkip(-1)).Sugar()
 }

@@ -122,6 +122,7 @@ func setupTransmissionMetrics(rpc *transmissionrpc.Client, c *cron.Cron) error {
 		v, err := getTrackers(r)
 		if err != nil {
 			logger.WithE(err).Error("failed to get latest trackers")
+
 			return err
 		}
 		mux.Lock()
