@@ -90,6 +90,8 @@ github.com/gofiber/fiber/v2 v2.26.0 h1:Awnfqp3fqbZzV3wZWMRJ6Xo2U8X0Ls68M7tXjx52N
 github.com/gofiber/fiber/v2 v2.26.0/go.mod h1:7efVWcBOZi1PyMWznnbitjnARPA7nYZxmQXJVod0bo0=
 github.com/gofiber/fiber/v2 v2.27.0 h1:u34t1nOea7zz4jcZDK7+ZMiG+MVFYrHqMhTdYQDiFA8=
 github.com/gofiber/fiber/v2 v2.27.0/go.mod h1:0bPXdTu+jRqINrEq1T6mHeVBnE0lQd67PGu35jD3hLk=
+github.com/gofiber/fiber/v2 v2.28.0 h1:EgoqkUhBad4MPN5mBEBRO9avRqjdNkWq0sApNXdatr8=
+github.com/gofiber/fiber/v2 v2.28.0/go.mod h1:0bPXdTu+jRqINrEq1T6mHeVBnE0lQd67PGu35jD3hLk=
 github.com/gofiber/utils v0.1.2 h1:1SH2YEz4RlNS0tJlMJ0bGwO0JkqPqvq6TbHK9tXZKtk=
 github.com/gofiber/utils v0.1.2/go.mod h1:pacRFtghAE3UoknMOUiXh2Io/nLWSUHtQCi/3QASsOc=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
