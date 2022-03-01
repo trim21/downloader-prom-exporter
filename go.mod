@@ -16,7 +16,7 @@ require (
 	github.com/savsgio/gotils v0.0.0-20220201163454-d252f0a44d5b
 	github.com/scylladb/go-set v1.0.2
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/fx v1.16.0
+	go.uber.org/fx v1.17.0
 	go.uber.org/zap v1.21.0
 )
 
@@ -40,7 +40,7 @@ require (
 	github.com/valyala/fasthttp v1.33.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/dig v1.12.0 // indirect
+	go.uber.org/dig v1.14.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
