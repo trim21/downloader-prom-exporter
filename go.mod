@@ -16,7 +16,7 @@ require (
 	github.com/savsgio/gotils v0.0.0-20220323135742-7576ce6963fd
 	github.com/scylladb/go-set v1.0.2
 	github.com/stretchr/testify v1.7.1
-	go.uber.org/fx v1.17.0
+	go.uber.org/fx v1.17.1
 	go.uber.org/zap v1.21.0
 )
 
