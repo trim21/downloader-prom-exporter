@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/savsgio/gotils v0.0.0-20220401102855-e56b59f40436
+	github.com/savsgio/gotils v0.0.0-20220530130905-52f3993e8d6d
 	github.com/scylladb/go-set v1.0.2
 	github.com/stretchr/testify v1.7.1
 	go.uber.org/fx v1.17.1
