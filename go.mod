@@ -3,7 +3,7 @@ module app
 go 1.17
 
 require (
-	github.com/avast/retry-go/v4 v4.0.5
+	github.com/avast/retry-go/v4 v4.1.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/adaptor/v2 v2.1.24
 	github.com/gofiber/fiber/v2 v2.34.0
