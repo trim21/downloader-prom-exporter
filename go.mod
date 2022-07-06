@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go/v4 v4.1.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/adaptor/v2 v2.1.24
-	github.com/gofiber/fiber/v2 v2.34.1
+	github.com/gofiber/fiber/v2 v2.35.0
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mrobinsn/go-rtorrent v1.8.0
@@ -37,7 +37,7 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.37.0 // indirect
+	github.com/valyala/fasthttp v1.38.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/dig v1.14.0 // indirect
