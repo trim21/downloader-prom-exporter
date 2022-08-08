@@ -17,7 +17,7 @@ require (
 	github.com/scylladb/go-set v1.0.2
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/fx v1.18.1
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.22.0
 )
 
 require (
