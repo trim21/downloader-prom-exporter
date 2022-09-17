@@ -32,19 +32,26 @@ func setupQBitMetrics(router fiber.Router) {
 		logger.WithE(err).Fatal("failed to create qbittorrent rpc client")
 	}
 
-	router.Get("/qbit/metrics", createQbitHandler(rpc))
+	router.Get("/qbit/metrics", createQbitHandler(rpc, u))
 }
 
-func createQbitHandler(rpc *qbittorrent.Client) fiber.Handler {
+func createQbitHandler(rpc *qbittorrent.Client, u *url.URL) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		logger.Debug("export qbittorrent metrics")
-		success, err := rpc.Login("", "")
-		if err != nil {
-			return errors.Wrap(err, "failed to login")
-		}
+		if u.User != nil {
+			username := u.User.Username()
+			password, ok := u.User.Password()
 
-		if !success {
-			return fiber.ErrUnauthorized
+			if username != "" || ok {
+				success, err := rpc.Login(username, password)
+				if err != nil {
+					return errors.Wrap(err, "failed to login")
+				}
+
+				if !success {
+					return fiber.ErrUnauthorized
+				}
+			}
 		}
 
 		t, err := rpc.Transfer()
