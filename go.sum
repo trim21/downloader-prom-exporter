@@ -85,6 +85,8 @@ github.com/gofiber/adaptor/v2 v2.1.27 h1:I3Xjn1qaH6W09shPi8F/kz98AncwbVYWFBV4niB
 github.com/gofiber/adaptor/v2 v2.1.27/go.mod h1:xcc+UqppJ+XfYVcqxp2fHyoqKctQxxvZ/IyUybNSIlQ=
 github.com/gofiber/fiber/v2 v2.37.1 h1:QK2032gjv0ulegpv/qlTEBoXQD3eFFzCHXcNN12UZCs=
 github.com/gofiber/fiber/v2 v2.37.1/go.mod h1:j3UslgQeJQP3mNhBxHnLLE8TPqA1Fd/lrl4gD25rRUY=
+github.com/gofiber/fiber/v2 v2.38.1 h1:GEQ/Yt3Wsf2a30iTqtLXlBYJZso0JXPovt/tmj5H9jU=
+github.com/gofiber/fiber/v2 v2.38.1/go.mod h1:t0NlbaXzuGH7I+7M4paE848fNWInZ7mfxI/Er1fTth8=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
