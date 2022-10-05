@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/avast/retry-go/v4 v4.1.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gofiber/adaptor/v2 v2.1.27
+	github.com/gofiber/adaptor/v2 v2.1.28
 	github.com/gofiber/fiber/v2 v2.38.1
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
 	github.com/mattn/go-colorable v0.1.13
