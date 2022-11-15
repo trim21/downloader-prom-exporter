@@ -46,6 +46,8 @@ github.com/avast/retry-go/v4 v4.2.0 h1:BsXOhycBOImJly7kSkZuuwnXWUyk5XHKwYvDam+wF
 github.com/avast/retry-go/v4 v4.2.0/go.mod h1:bqOlT4nxk4phk9buiQFaghzjpqdchOSwPgjdfdQBtdg=
 github.com/avast/retry-go/v4 v4.3.0 h1:cqI48aXx0BExKoM7XPklDpoHAg7/srPPLAfWG5z62jo=
 github.com/avast/retry-go/v4 v4.3.0/go.mod h1:bqOlT4nxk4phk9buiQFaghzjpqdchOSwPgjdfdQBtdg=
+github.com/avast/retry-go/v4 v4.3.1 h1:Mtg11F9PdAIMkMiio2RKcYauoVHjl2aB3zQJJlzD4cE=
+github.com/avast/retry-go/v4 v4.3.1/go.mod h1:rg6XFaiuFYII0Xu3RDbZQkxCofFwruZKW8oEF1jpWiU=
 github.com/benbjohnson/clock v1.3.0 h1:ip6w0uFQkncKQ979AypyG0ER7mqUSBdKLOgAle/AT8A=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
