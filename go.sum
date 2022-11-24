@@ -89,6 +89,8 @@ github.com/go-resty/resty/v2 v2.7.0/go.mod h1:9PWDzw47qPphMRFfhsyk0NnSgvluHcljSM
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gofiber/adaptor/v2 v2.1.27 h1:I3Xjn1qaH6W09shPi8F/kz98AncwbVYWFBV4niBBC0Q=
 github.com/gofiber/adaptor/v2 v2.1.27/go.mod h1:xcc+UqppJ+XfYVcqxp2fHyoqKctQxxvZ/IyUybNSIlQ=
+github.com/gofiber/adaptor/v2 v2.1.29 h1:JnYd6fbqVM9D4zPchk+kg89PfxyuKqZKhBWGQDHfKH4=
+github.com/gofiber/adaptor/v2 v2.1.29/go.mod h1:z4mAV9mMsUgIEVGGS5Ii6ZMTJq4VdV1KWL1JAbsZdUA=
 github.com/gofiber/fiber/v2 v2.37.1 h1:QK2032gjv0ulegpv/qlTEBoXQD3eFFzCHXcNN12UZCs=
 github.com/gofiber/fiber/v2 v2.37.1/go.mod h1:j3UslgQeJQP3mNhBxHnLLE8TPqA1Fd/lrl4gD25rRUY=
 github.com/gofiber/fiber/v2 v2.38.1 h1:GEQ/Yt3Wsf2a30iTqtLXlBYJZso0JXPovt/tmj5H9jU=
