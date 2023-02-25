@@ -15,7 +15,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee
 	github.com/scylladb/go-set v1.0.2
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	go.uber.org/fx v1.19.2
 	go.uber.org/zap v1.24.0
 )
