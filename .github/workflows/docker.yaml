@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: "^1.17"
+          go-version: "^1.20"
 
       - uses: actions/cache@v3
         with:
@@ -27,7 +27,7 @@ jobs:
 
       - run: go get ./...
 
-      - run: go build -o dist/app
+      - run: go build -ldflags="-s -w" -o dist/app
 
       - run: docker build -t ghcr.io/trim21/downloader-prom-exporter:latest .
 
