@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go/v4 v4.3.3
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gofiber/adaptor/v2 v2.2.0
-	github.com/gofiber/fiber/v2 v2.43.0
+	github.com/gofiber/fiber/v2 v2.44.0
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mrobinsn/go-rtorrent v1.8.0
@@ -30,7 +30,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hekmon/cunits/v2 v2.1.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
@@ -48,7 +48,7 @@ require (
 	go.uber.org/dig v1.16.1 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
