@@ -107,6 +107,8 @@ github.com/gofiber/adaptor/v2 v2.1.32 h1:94cL79U4ekq78TmqfXPrulMWkpfPxqzHimUc/B+
 github.com/gofiber/adaptor/v2 v2.1.32/go.mod h1:aX4qfSo+1AJYIWnLL1Mx3EQ6znC6WW46MqFQruUQE6c=
 github.com/gofiber/adaptor/v2 v2.2.0 h1:MGz/LW8l+avBER56v87dzcH+mqi+90CX00k8Lv8QQz8=
 github.com/gofiber/adaptor/v2 v2.2.0/go.mod h1:A51dt83PyWNUZp/9Op4FBI2qxDUceg15hWtf8Vk9ZOU=
+github.com/gofiber/adaptor/v2 v2.2.1 h1:givE7iViQWlsTR4Jh7tB4iXzrlKBgiraB/yTdHs9Lv4=
+github.com/gofiber/adaptor/v2 v2.2.1/go.mod h1:AhR16dEqs25W2FY/l8gSj1b51Azg5dtPDmm+pruNOrc=
 github.com/gofiber/fiber/v2 v2.37.1 h1:QK2032gjv0ulegpv/qlTEBoXQD3eFFzCHXcNN12UZCs=
 github.com/gofiber/fiber/v2 v2.37.1/go.mod h1:j3UslgQeJQP3mNhBxHnLLE8TPqA1Fd/lrl4gD25rRUY=
 github.com/gofiber/fiber/v2 v2.38.1 h1:GEQ/Yt3Wsf2a30iTqtLXlBYJZso0JXPovt/tmj5H9jU=
