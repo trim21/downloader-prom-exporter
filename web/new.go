@@ -20,7 +20,7 @@ type S struct {
 func (s *S) Start() error {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "80"
 	}
 
 	return errgo.Wrap(s.app.Listen(fmt.Sprintf("127.0.0.1:%s", port)), "failed to start http server")
