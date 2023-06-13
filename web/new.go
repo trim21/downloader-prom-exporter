@@ -18,12 +18,17 @@ type S struct {
 }
 
 func (s *S) Start() error {
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = "0.0.0.0"
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "80"
 	}
 
-	return errgo.Wrap(s.app.Listen(fmt.Sprintf("127.0.0.1:%s", port)), "failed to start http server")
+	return errgo.Wrap(s.app.Listen(fmt.Sprintf("%s:%s", host, port)), "failed to start http server")
 }
 
 func New() (S, error) {
