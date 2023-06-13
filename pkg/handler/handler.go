@@ -8,9 +8,10 @@ import (
 )
 
 func SetupRouter(router fiber.Router) error {
-	err := setupTransmissionMetrics(router)
-	if err != nil {
+	if reporter, err := setupTransmissionMetrics(); err != nil {
 		return err
+	} else if reporter != nil {
+		prometheus.MustRegister(reporter)
 	}
 
 	if reporter := setupRTorrentMetrics(); reporter != nil {
