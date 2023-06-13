@@ -1,12 +1,13 @@
 package qbittorrent
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/trim21/errgo"
 
 	"app/pkg/utils"
 )
@@ -57,12 +58,12 @@ func (c *Client) Login(username string, password string) (loggedIn bool, err err
 		Get("api/v2/auth/login")
 
 	if err != nil {
-		return false, errors.Wrap(ErrConnectToDaemon, err.Error())
+		return false, errgo.Wrap(ErrConnectToDaemon, err.Error())
 	} else if resp.StatusCode() != 200 { // check for correct status code
 		fmt.Println(resp.String())
 		fmt.Println(resp.Request.URL)
 
-		return false, errors.Wrap(ErrBadResponse, "couldn't log in")
+		return false, errgo.Wrap(ErrBadResponse, "couldn't log in")
 	}
 
 	// change authentication status so we know were authenticated in later requests
@@ -104,13 +105,13 @@ func (c *Client) Torrents() ([]Torrent, error) {
 
 	resp, err := c.h.R().SetResult(&t).Get("api/v2/torrents/info")
 	if err != nil {
-		return nil, errors.Wrap(ErrConnectToDaemon, "")
+		return nil, errgo.Wrap(ErrConnectToDaemon, "")
 	}
 
 	if resp.StatusCode() >= 300 {
 		log.Debug().Msg(resp.String())
 
-		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
+		return nil, errgo.Wrap(ErrBadResponse, "status code >= 300")
 	}
 
 	return t, nil
@@ -162,11 +163,11 @@ func (c *Client) Transfer() (*Transfer, error) {
 
 	resp, err := c.h.R().SetResult(t).Get("api/v2/transfer/info")
 	if err != nil {
-		return nil, errors.Wrap(err, "can't connect to http daemon")
+		return nil, errgo.Wrap(err, "can't connect to http daemon")
 	}
 
 	if resp.StatusCode() >= 300 {
-		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
+		return nil, errgo.Wrap(ErrBadResponse, "status code >= 300")
 	}
 
 	return t, nil
@@ -179,13 +180,13 @@ func (c *Client) MainData() (*MainData, error) {
 		SetQueryParam("rid", "0").
 		Get("api/v2/sync/maindata")
 	if err != nil {
-		return nil, errors.Wrap(err, "can't connect to http daemon")
+		return nil, errgo.Wrap(err, "can't connect to http daemon")
 	}
 
 	if resp.StatusCode() >= 300 {
 		log.Debug().Msg(resp.String())
 
-		return nil, errors.Wrap(ErrBadResponse, "status code >= 300")
+		return nil, errgo.Wrap(ErrBadResponse, "status code >= 300")
 	}
 
 	return t, nil

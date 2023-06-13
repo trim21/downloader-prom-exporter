@@ -5,7 +5,7 @@ import (
 
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
-	"github.com/pkg/errors"
+	"github.com/trim21/errgo"
 
 	"app/pkg/utils"
 )
@@ -99,7 +99,7 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 		}},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get current status")
+		return nil, errgo.Wrap(err, "failed to get current status")
 	}
 
 	v := &MainData{}
@@ -127,19 +127,19 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 	*/
 
 	if v.Hostname, ok = getString(r, 0); !ok {
-		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'system.hostname'")
+		return nil, errgo.Wrap(ErrUnmarshal, "failed to decode 'system.hostname'")
 	}
 
 	if v.DownTotal, ok = getInt(r, 1); !ok {
-		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_down.total'")
+		return nil, errgo.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_down.total'")
 	}
 
 	if v.UpTotal, ok = getInt(r, 2); !ok { //nolint:gomnd
-		return nil, errors.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_up.total'")
+		return nil, errgo.Wrap(ErrUnmarshal, "failed to decode 'throttle.global_up.total'")
 	}
 
 	if v.Torrents, err = parseTorrents(r[3]); err != nil {
-		return nil, errors.Wrap(err, "failed to decode Torrents")
+		return nil, errgo.Wrap(err, "failed to decode Torrents")
 	}
 
 	return v, nil
