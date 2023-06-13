@@ -12,6 +12,7 @@ import (
 
 	"app/pkg/logger"
 	rt "app/pkg/rtorrent"
+	"app/pkg/utils"
 )
 
 func setupRTorrentMetrics() prometheus.Collector {
@@ -45,26 +46,19 @@ type rTorrentExporter struct {
 func (r rTorrentExporter) Describe(c chan<- *prometheus.Desc) {
 }
 
-func (r rTorrentExporter) Collect(metrics chan<- prometheus.Metric) {
+func (r rTorrentExporter) Collect(m chan<- prometheus.Metric) {
 	v, err := rt.GetGlobalData(r.rt)
 	if err != nil {
+		logger.Error("failed to fetch rtorrent data", zap.Error(err))
+		return
 	}
 
-	t := prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_upload_total_bytes", ConstLabels: prometheus.Labels{"hostname": v.Hostname}})
-	t.Set(float64(v.UpTotal))
-	metrics <- t
+	m <- utils.Gauge("rtorrent_upload_total_bytes", prometheus.Labels{"hostname": v.Hostname}, float64(v.UpTotal))
 
-	t = prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_download_total_bytes", ConstLabels: prometheus.Labels{"hostname": v.Hostname}})
-	t.Set(float64(v.DownTotal))
-	metrics <- t
+	m <- utils.Gauge("rtorrent_download_total_bytes", prometheus.Labels{"hostname": v.Hostname}, float64(v.DownTotal))
 
 	for _, t := range v.Torrents {
-		c := prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_torrent_download_bytes", ConstLabels: prometheus.Labels{"hash": t.Hash}})
-		c.Set(float64(t.DownloadTotal))
-		metrics <- c
-
-		c = prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_torrent_upload_bytes", ConstLabels: prometheus.Labels{"hash": t.Hash}})
-		c.Set(float64(t.UploadTotal))
-		metrics <- c
+		m <- utils.Gauge("rtorrent_torrent_download_bytes", prometheus.Labels{"hash": t.Hash}, float64(t.DownloadTotal))
+		m <- utils.Gauge("rtorrent_torrent_upload_bytes", prometheus.Labels{"hash": t.Hash}, float64(t.UploadTotal))
 	}
 }
