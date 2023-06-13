@@ -1,14 +1,10 @@
 package handler
 
 import (
-	"fmt"
-	"io"
 	"net/url"
 	"os"
-	"strconv"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 
 	"app/pkg/logger"
@@ -16,10 +12,10 @@ import (
 	"app/pkg/utils"
 )
 
-func setupQBitMetrics(router fiber.Router) {
+func setupQBitMetrics() prometheus.Collector {
 	entryPoint, found := os.LookupEnv("QBIT_API_ENTRYPOINT")
 	if !found {
-		return
+		return nil
 	}
 
 	u, err := url.Parse(entryPoint)
@@ -32,127 +28,44 @@ func setupQBitMetrics(router fiber.Router) {
 		logger.WithE(err).Fatal("failed to create qbittorrent rpc client")
 	}
 
-	router.Get("/qbit/metrics", createQbitHandler(rpc, u))
+	return qBittorrentExporter{client: rpc}
 }
 
-func createQbitHandler(rpc *qbittorrent.Client, u *url.URL) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		logger.Debug("export qbittorrent metrics")
-		if u.User != nil {
-			username := u.User.Username()
-			password, ok := u.User.Password()
-
-			if username != "" || ok {
-				success, err := rpc.Login(username, password)
-				if err != nil {
-					return errors.Wrap(err, "failed to login")
-				}
-
-				if !success {
-					return fiber.ErrUnauthorized
-				}
-			}
-		}
-
-		t, err := rpc.Transfer()
-		if err != nil {
-			return errors.Wrap(err, "failed to get transfer info")
-		}
-
-		d, err := rpc.MainData()
-		if err != nil {
-			return errors.Wrap(err, "failed to get main data")
-		}
-
-		writeGlobalData(ctx, &d.ServerState, t)
-
-		for hash := range d.Torrents {
-			writeQBitTorrent(ctx, hash, d.Torrents[hash])
-		}
-
-		return nil
-	}
+type qBittorrentExporter struct {
+	client *qbittorrent.Client
 }
 
-const qDefaultCategory = "UN-CATEGORIZED"
-
-func writeGlobalData(w io.Writer, s *qbittorrent.ServerState, t *qbittorrent.Transfer) {
-	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeUl))
-	fmt.Fprintf(w, "qbittorrent_upload_total_bytes %d\n\n", s.AllTimeUl)
-
-	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(s.AllTimeDl))
-	fmt.Fprintf(w, "qbittorrent_download_total_bytes %d\n\n", s.AllTimeDl)
-
-	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.DlInfoData))
-	fmt.Fprintf(w, "qbittorrent_dl_info_data_bytes %d\n\n", t.DlInfoData)
-
-	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(t.UpInfoData))
-	fmt.Fprintf(w, "qbittorrent_up_info_data_bytes %d\n\n", t.UpInfoData)
-
-	fmt.Fprintf(w, "# %s\n", utils.ByteCountIEC(int64(s.TotalBuffersSize)))
-	fmt.Fprintf(w, "qbittorrent_total_buffers_size %d\n\n", s.TotalBuffersSize)
-
-	fmt.Fprintf(w, "qbittorrent_dht_nodes %d\n", t.DhtNodes)
-	fmt.Fprintf(w, "qbittorrent_read_cache_hits %s\n", s.ReadCacheHits)
-	fmt.Fprintf(w, "qbittorrent_read_cache_overload %s\n", s.ReadCacheOverload)
-	fmt.Fprintf(w, "qbittorrent_write_cache_overload %s\n", s.WriteCacheOverload)
-
-	fmt.Fprintf(w, "qbittorrent_queued_io_jobs %d\n", s.QueuedIoJobs)
-	fmt.Fprintf(w, "qbittorrent_average_queue_time_ms %d\n", s.AverageTimeQueue)
+func (r qBittorrentExporter) Describe(c chan<- *prometheus.Desc) {
 }
 
-func writeQBitTorrent(w io.Writer, hash string, t qbittorrent.Torrent) {
-	fmt.Fprintln(w, "\n# torrent", strconv.Quote(t.Name))
-	fmt.Fprintln(w, "# category:", t.Category)
-
-	var label string
-	if t.Category != "" {
-		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
-			strconv.Quote(t.Category), strconv.Quote(hash), strconv.Quote(t.State))
-	} else {
-		label = fmt.Sprintf("category=%s, hash=%s, state=%s",
-			strconv.Quote(qDefaultCategory), strconv.Quote(hash), strconv.Quote(t.State))
+func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
+	t, err := r.client.Transfer()
+	if err != nil {
+		logger.Error("failed to get qbittorrent transfer info", zap.Error(err))
+		return
 	}
 
-	var restUpload float64
+	m <- utils.Gauge("qbittorrent_up_info_data_bytes", nil, float64(t.UpInfoData))
+	m <- utils.Gauge("qbittorrent_dl_info_data_bytes", nil, float64(t.DlInfoData))
+	m <- utils.Gauge("qbittorrent_dht_nodes", nil, float64(t.DhtNodes))
 
-	switch t.State {
-	case qbittorrent.StateUploading, qbittorrent.StateStalledUploading, qbittorrent.StateDownloading:
-		v := t.MaxRatio - t.Ratio
-		if v > 0 {
-			restUpload = float64(t.Downloaded) * v
-		}
-	case qbittorrent.StateCheckingUploading, qbittorrent.StateMoving:
-		toUpload := float64(t.Size) * (t.MaxRatio - t.Ratio)
-		uploaded := float64(t.Uploaded)
-		if toUpload > uploaded {
-			restUpload = toUpload - uploaded
-		}
+	d, err := r.client.MainData()
+	if err != nil {
+		logger.Error("failed to get qbittorrent main info", zap.Error(err))
+		return
 	}
 
-	fmt.Fprintf(w, "qbittorrent_torrent_upload_todo_bytes{%s} %.1f\n", label, restUpload)
-	switch t.State {
-	case qbittorrent.StateCheckingUploading:
-		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
+	s := d.ServerState
 
-	case qbittorrent.StatePausedUploading, qbittorrent.StatePausedDownloading, qbittorrent.StateForceDownloading:
-		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} 0\n", label)
+	m <- utils.Gauge("qbittorrent_total_buffers_size", nil, float64(s.TotalBuffersSize))
+	m <- utils.Gauge("qbittorrent_upload_total_bytes", nil, float64(s.AllTimeUl))
+	m <- utils.Gauge("qbittorrent_download_total_bytes", nil, float64(s.AllTimeDl))
+	m <- utils.Gauge("qbittorrent_queued_io_jobs", nil, float64(s.QueuedIoJobs))
+	m <- utils.Gauge("qbittorrent_average_queue_time_ms", nil, float64(s.AverageTimeQueue))
 
-	default:
-		fmt.Fprintf(w, "qbittorrent_torrent_todo_bytes{%s} %d\n", label, t.AmountLeft)
+	for hash, t := range d.Torrents {
+		labels := prometheus.Labels{"category": t.Category, "hash": hash}
+		m <- utils.Gauge("qbittorrent_torrent_download_bytes", labels, float64(t.Downloaded))
+		m <- utils.Gauge("qbittorrent_torrent_upload_bytes", labels, float64(t.Uploaded))
 	}
-
-	switch t.State {
-	case qbittorrent.StateStalledUploading, qbittorrent.StateUploading,
-		qbittorrent.StateForceUploading:
-		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Size)
-	case qbittorrent.StateDownloading, qbittorrent.StateStalledDownloading,
-		qbittorrent.StateForceDownloading:
-		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, t.Downloaded)
-	default:
-		fmt.Fprintf(w, "qbittorrent_torrent_seeding_bytes{%s} %d\n", label, 0)
-	}
-
-	fmt.Fprintf(w, "qbittorrent_torrent_download_bytes{%s} %d\n", label, t.Downloaded)
-	fmt.Fprintf(w, "qbittorrent_torrent_upload_bytes{%s} %d\n", label, t.Uploaded)
 }

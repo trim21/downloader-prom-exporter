@@ -13,12 +13,13 @@ func SetupRouter(router fiber.Router) error {
 		return err
 	}
 
-	reporter := setupRTorrentMetrics()
-	if reporter != nil {
+	if reporter := setupRTorrentMetrics(); reporter != nil {
 		prometheus.MustRegister(reporter)
 	}
 
-	setupQBitMetrics(router)
+	if reporter := setupQBitMetrics(); reporter != nil {
+		prometheus.MustRegister(reporter)
+	}
 
 	router.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
