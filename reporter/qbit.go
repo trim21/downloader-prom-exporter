@@ -1,13 +1,12 @@
-package handler
+package reporter
 
 import (
 	"net/url"
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog/log"
 
-	"app/pkg/logger"
 	"app/pkg/qbittorrent"
 	"app/pkg/utils"
 )
@@ -20,12 +19,14 @@ func setupQBitMetrics() prometheus.Collector {
 
 	u, err := url.Parse(entryPoint)
 	if err != nil {
-		logger.Fatal("can't parse QBIT_API_ENTRYPOINT", zap.String("value", entryPoint))
+		log.Fatal().Str("value", entryPoint).Msg("can't parse QBIT_API_ENTRYPOINT")
+		return nil
 	}
 
 	rpc, err := qbittorrent.NewClient(u)
 	if err != nil {
-		logger.WithE(err).Fatal("failed to create qbittorrent rpc client")
+		log.Fatal().Err(err).Msg("failed to create qbittorrent rpc client")
+		return nil
 	}
 
 	return qBittorrentExporter{client: rpc}
@@ -41,7 +42,7 @@ func (r qBittorrentExporter) Describe(c chan<- *prometheus.Desc) {
 func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 	t, err := r.client.Transfer()
 	if err != nil {
-		logger.Error("failed to get qbittorrent transfer info", zap.Error(err))
+		log.Error().Err(err).Msg("failed to get qbittorrent transfer info")
 		return
 	}
 
@@ -51,7 +52,7 @@ func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 
 	d, err := r.client.MainData()
 	if err != nil {
-		logger.Error("failed to get qbittorrent main info", zap.Error(err))
+		log.Error().Err(err).Msg("failed to get qbittorrent main info")
 		return
 	}
 

@@ -1,13 +1,10 @@
-package handler
+package reporter
 
 import (
-	"github.com/gofiber/adaptor/v2"
-	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func SetupRouter(router fiber.Router) error {
+func SetupMetrics() error {
 	if reporter, err := setupTransmissionMetrics(); err != nil {
 		return err
 	} else if reporter != nil {
@@ -21,8 +18,6 @@ func SetupRouter(router fiber.Router) error {
 	if reporter := setupQBitMetrics(); reporter != nil {
 		prometheus.MustRegister(reporter)
 	}
-
-	router.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	return nil
 }

@@ -2,22 +2,21 @@ package web
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/savsgio/gotils/nocopy"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/trim21/errgo"
 
-	"app/pkg/errgo"
-	"app/pkg/handler"
-	"app/pkg/logger"
+	"app/reporter"
 )
 
-type S struct {
-	_   nocopy.NoCopy
-	app *fiber.App
-}
+func Start() error {
+	err := reporter.SetupMetrics()
+	if err != nil {
+		return err
+	}
 
-func (s *S) Start() error {
 	host := os.Getenv("HOST")
 	if host == "" {
 		host = "0.0.0.0"
@@ -28,23 +27,7 @@ func (s *S) Start() error {
 		port = "80"
 	}
 
-	return errgo.Wrap(s.app.Listen(fmt.Sprintf("%s:%s", host, port)), "failed to start http server")
-}
+	http.Handle("/metrics", promhttp.Handler())
 
-func New() (S, error) {
-	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
-		StrictRouting:         true,
-		CaseSensitive:         true,
-		GETOnly:               false,
-	})
-
-	err := handler.SetupRouter(app)
-	if err != nil {
-		return S{}, err
-	}
-
-	logger.Info("start server")
-
-	return S{app: app}, nil
+	return errgo.Wrap(http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), http.DefaultServeMux), "failed to start http server")
 }

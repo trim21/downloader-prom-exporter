@@ -7,7 +7,8 @@ import (
 
 	"github.com/hekmon/transmissionrpc/v2"
 
-	"app/pkg/errgo"
+	"github.com/trim21/errgo"
+
 	"app/pkg/utils"
 )
 

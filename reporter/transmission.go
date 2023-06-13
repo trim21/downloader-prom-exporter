@@ -1,4 +1,4 @@
-package handler
+package reporter
 
 import (
 	"context"
@@ -6,9 +6,8 @@ import (
 
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog/log"
 
-	"app/pkg/logger"
 	"app/pkg/transmission"
 	"app/pkg/utils"
 )
@@ -24,7 +23,7 @@ func setupTransmissionMetrics() (prometheus.Collector, error) {
 		return nil, nil
 	}
 
-	logger.Info("enable transmission reporter")
+	log.Info().Msg("enable transmission reporter")
 
 	return transmissionExporter{client: client}, nil
 }
@@ -41,7 +40,7 @@ func (r transmissionExporter) Collect(m chan<- prometheus.Metric) {
 	defer cancel()
 	h, err := r.client.SessionStats(ctx)
 	if err != nil {
-		logger.Error("failed to fetch transmission server stats", zap.Error(err))
+		log.Err(err).Msg("failed to fetch transmission server stats")
 		return
 	}
 
@@ -50,7 +49,7 @@ func (r transmissionExporter) Collect(m chan<- prometheus.Metric) {
 
 	torrents, err := r.client.TorrentGet(ctx, torrentFields, nil)
 	if err != nil {
-		logger.Error("failed to fetch transmission torrents", zap.Error(err))
+		log.Err(err).Msg("failed to fetch transmission torrents")
 		return
 	}
 

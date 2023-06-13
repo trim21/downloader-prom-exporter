@@ -1,4 +1,4 @@
-package handler
+package reporter
 
 import (
 	"net/http"
@@ -7,10 +7,9 @@ import (
 
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/prometheus/client_golang/prometheus"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/scgi.v0"
 
-	"app/pkg/logger"
 	rt "app/pkg/rtorrent"
 	"app/pkg/utils"
 )
@@ -18,16 +17,16 @@ import (
 func setupRTorrentMetrics() prometheus.Collector {
 	entryPoint, found := os.LookupEnv("RTORRENT_API_ENTRYPOINT")
 	if !found {
-		logger.Info("env RTORRENT_API_ENTRYPOINT not set, rtorrent exporter disabled")
+		log.Info().Msg("env RTORRENT_API_ENTRYPOINT not set, rtorrent exporter disabled")
 		return nil
 	}
 
 	u, err := url.Parse(entryPoint)
 	if err != nil {
-		logger.Fatal("can't parse RTORRENT_API_ENTRYPOINT", zap.String("value", entryPoint))
+		log.Fatal().Str("value", entryPoint).Msg("can't parse RTORRENT_API_ENTRYPOINT")
 	}
 
-	logger.Info("rtorrent exporter enabled")
+	log.Info().Msg("rtorrent exporter enabled")
 
 	var rpc *xmlrpc.Client
 	if u.Scheme == "scgi" {
@@ -49,7 +48,7 @@ func (r rTorrentExporter) Describe(c chan<- *prometheus.Desc) {
 func (r rTorrentExporter) Collect(m chan<- prometheus.Metric) {
 	v, err := rt.GetGlobalData(r.rt)
 	if err != nil {
-		logger.Error("failed to fetch rtorrent data", zap.Error(err))
+		log.Error().Err(err).Msg("failed to fetch rtorrent data")
 		return
 	}
 

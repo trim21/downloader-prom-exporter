@@ -4,17 +4,14 @@ import (
 	"net/url"
 	"strconv"
 
-	"go.uber.org/zap"
-
-	"app/pkg/logger"
+	"github.com/rs/zerolog/log"
 )
 
 func GetPort(u *url.URL) uint16 {
 	if r := u.Port(); r != "" {
 		v, err := strconv.Atoi(r)
 		if err != nil {
-			logger.Fatal("failed to parse transmission port",
-				zap.Int("port", v), zap.Error(err))
+			log.Fatal().Int("port", v).Err(err).Msg("failed to parse transmission port")
 		}
 
 		return uint16(v)
