@@ -1,16 +1,12 @@
 package handler
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
-	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 	"gopkg.in/scgi.v0"
 
@@ -18,11 +14,11 @@ import (
 	rt "app/pkg/rtorrent"
 )
 
-func setupRTorrentMetrics(router fiber.Router) {
+func setupRTorrentMetrics() prometheus.Collector {
 	entryPoint, found := os.LookupEnv("RTORRENT_API_ENTRYPOINT")
 	if !found {
 		logger.Info("env RTORRENT_API_ENTRYPOINT not set, rtorrent exporter disabled")
-		return
+		return nil
 	}
 
 	u, err := url.Parse(entryPoint)
@@ -39,39 +35,36 @@ func setupRTorrentMetrics(router fiber.Router) {
 		rpc = xmlrpc.NewClient(entryPoint, true)
 	}
 
-	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
-		logger.Debug("export rtorrent metrics")
-		v, err := rt.GetGlobalData(rpc)
-		if err != nil {
-			return errors.WithMessage(err, "rpc")
-		}
-
-		fmt.Fprintf(ctx, "rtorrent_upload_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.UpTotal)
-		fmt.Fprintf(ctx, "rtorrent_download_total_bytes{hostname=%s} %d\n", strconv.Quote(v.Hostname), v.DownTotal)
-
-		for i := range v.Torrents {
-			writeRtorrentTorrent(ctx, &v.Torrents[i])
-		}
-
-		return nil
-	})
+	return rTorrentExporter{rt: rpc}
 }
 
-func writeRtorrentTorrent(w io.Writer, t *rt.Torrent) {
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "# torrent", strconv.Quote(t.Name))
-	fmt.Fprintln(w, "# label:", t.Label)
+type rTorrentExporter struct {
+	rt *xmlrpc.Client
+}
 
-	if t.Label == "" {
-		fmt.Fprintf(w, "rtorrent_torrent_download_total_bytes{hash=%s} %d\n",
-			strconv.Quote(t.Hash), t.DownloadTotal)
-	} else {
-		for _, label := range t.Labels() {
-			fmt.Fprintf(w, "rtorrent_torrent_download_bytes{label=%s, hash=%s} %d\n",
-				strconv.Quote(label), strconv.Quote(t.Hash), t.DownloadTotal)
+func (r rTorrentExporter) Describe(c chan<- *prometheus.Desc) {
+}
 
-			fmt.Fprintf(w, "rtorrent_torrent_upload_bytes{label=%s, hash=%s} %d\n",
-				strconv.Quote(label), strconv.Quote(t.Hash), t.UploadTotal)
-		}
+func (r rTorrentExporter) Collect(metrics chan<- prometheus.Metric) {
+	v, err := rt.GetGlobalData(r.rt)
+	if err != nil {
+	}
+
+	t := prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_upload_total_bytes", ConstLabels: prometheus.Labels{"hostname": v.Hostname}})
+	t.Set(float64(v.UpTotal))
+	metrics <- t
+
+	t = prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_download_total_bytes", ConstLabels: prometheus.Labels{"hostname": v.Hostname}})
+	t.Set(float64(v.DownTotal))
+	metrics <- t
+
+	for _, t := range v.Torrents {
+		c := prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_torrent_download_bytes", ConstLabels: prometheus.Labels{"hash": t.Hash}})
+		c.Set(float64(t.DownloadTotal))
+		metrics <- c
+
+		c = prometheus.NewGauge(prometheus.GaugeOpts{Name: "rtorrent_torrent_upload_bytes", ConstLabels: prometheus.Labels{"hash": t.Hash}})
+		c.Set(float64(t.UploadTotal))
+		metrics <- c
 	}
 }

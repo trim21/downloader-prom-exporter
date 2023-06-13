@@ -23,7 +23,7 @@ scrape_configs:
     static_configs:
       - targets: ["my-site-proxy:80"]
   - job_name: "rtorrent"
-    metrics_path: /rtorrent/metrics
+    metrics_path: /metrics # this path also export go runtime metrics
     static_configs:
       - targets: ["my-site-proxy:80"]
   - job_name: "qbittorrent"
