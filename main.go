@@ -1,6 +1,9 @@
 package main
 
 import (
+	// This would automatically load/inject environment variables from a .env file
+	_ "github.com/joho/godotenv/autoload"
+
 	"go.uber.org/fx"
 
 	"app/cron"

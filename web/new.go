@@ -1,8 +1,10 @@
 package web
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/savsgio/gotils/nocopy"
 
 	"app/pkg/errgo"
@@ -16,10 +18,15 @@ type S struct {
 }
 
 func (s *S) Start() error {
-	return errgo.Wrap(s.app.Listen(":80"), "failed to start http server")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	return errgo.Wrap(s.app.Listen(fmt.Sprintf("127.0.0.1:%s", port)), "failed to start http server")
 }
 
-func New(tr *transmissionrpc.Client) (S, error) {
+func New() (S, error) {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		StrictRouting:         true,
@@ -27,7 +34,11 @@ func New(tr *transmissionrpc.Client) (S, error) {
 		GETOnly:               false,
 	})
 
-	handler.SetupRouter(tr, app)
+	err := handler.SetupRouter(app)
+	if err != nil {
+		return S{}, err
+	}
+
 	logger.Info("start server")
 
 	return S{app: app}, nil

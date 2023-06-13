@@ -15,12 +15,20 @@ import (
 	"github.com/pkg/errors"
 
 	"app/pkg/logger"
+	"app/pkg/transmission"
 )
 
-func setupTransmissionMetrics(client *transmissionrpc.Client, router fiber.Router) {
-	if client == nil {
-		return
+func setupTransmissionMetrics(router fiber.Router) error {
+	client, err := transmission.New()
+	if err != nil {
+		return err
 	}
+	if client == nil {
+		return nil
+	}
+
+	logger.Info("enable transmission reporter")
+
 	var interval = 10 * time.Second
 	if rawInterval, found := os.LookupEnv("TRANSMISSION_UPDATE_INTERVAL"); found {
 		v, err := time.ParseDuration(rawInterval)
@@ -47,6 +55,8 @@ func setupTransmissionMetrics(client *transmissionrpc.Client, router fiber.Route
 	go runInBackground(interval, h.statsUpdater)
 
 	router.Get("/transmission/metrics", h.fiberHandler)
+
+	return nil
 }
 
 type transmissionHandler struct {

@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"gopkg.in/scgi.v0"
 
 	"app/pkg/logger"
 	rt "app/pkg/rtorrent"
@@ -19,15 +21,23 @@ import (
 func setupRTorrentMetrics(router fiber.Router) {
 	entryPoint, found := os.LookupEnv("RTORRENT_API_ENTRYPOINT")
 	if !found {
+		logger.Info("env RTORRENT_API_ENTRYPOINT not set, rtorrent exporter disabled")
 		return
 	}
 
-	_, err := url.Parse(entryPoint)
+	u, err := url.Parse(entryPoint)
 	if err != nil {
 		logger.Fatal("can't parse RTORRENT_API_ENTRYPOINT", zap.String("value", entryPoint))
 	}
 
-	rpc := xmlrpc.NewClient(entryPoint, true)
+	logger.Info("rtorrent exporter enabled")
+
+	var rpc *xmlrpc.Client
+	if u.Scheme == "scgi" {
+		rpc = xmlrpc.NewClientWithHTTPClient(entryPoint, &http.Client{Transport: &scgi.Client{}})
+	} else {
+		rpc = xmlrpc.NewClient(entryPoint, true)
+	}
 
 	router.Get("/rtorrent/metrics", func(ctx *fiber.Ctx) error {
 		logger.Debug("export rtorrent metrics")

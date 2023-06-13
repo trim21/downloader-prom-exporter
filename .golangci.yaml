@@ -214,8 +214,9 @@ linters-settings:
     force-err-cuddling: true
 
 linters:
-  enable-all: true
   disable:
+    - depguard
+    - exhaustruct
     - gomnd
     - wsl # noisy
     - exhaustivestruct
@@ -229,7 +230,7 @@ linters:
     - interfacer
     - varnamelen
     - cyclop
-  fast: false
+  fast: true
 
 issues:
   new: false

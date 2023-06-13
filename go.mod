@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/pkg/errors v0.9.1
@@ -18,6 +19,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/fx v1.20.0
 	go.uber.org/zap v1.24.0
+	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
 )
 
 require (
@@ -30,6 +32,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hekmon/cunits/v2 v2.1.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -39,6 +42,7 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
