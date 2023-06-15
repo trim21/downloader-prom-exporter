@@ -25,6 +25,8 @@ scrape_configs:
       - targets: ["127.0.0.1:8521"]
 ```
 
-dashboard: https://grafana.com/grafana/dashboards/18986
+## dashboard
+
+see [./dashboard.json](./dashboard.json) or https://grafana.com/grafana/dashboards/18986
 
 ![dashboard](./.github/dashboard.jpg)
