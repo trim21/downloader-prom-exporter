@@ -27,6 +27,4 @@ scrape_configs:
 
 ## dashboard
 
-see [./dashboard.json](./dashboard.json) or https://grafana.com/grafana/dashboards/18986
-
-![dashboard](./.github/dashboard.jpg)
+https://grafana.com/grafana/dashboards/18986
