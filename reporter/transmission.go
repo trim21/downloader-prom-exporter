@@ -46,6 +46,8 @@ func (r transmissionExporter) Collect(m chan<- prometheus.Metric) {
 
 	m <- utils.Gauge("transmission_download_session_bytes", nil, float64(h.CurrentStats.DownloadedBytes))
 	m <- utils.Gauge("transmission_upload_session_bytes", nil, float64(h.CurrentStats.UploadedBytes))
+	m <- utils.Gauge("transmission_download_total_bytes", nil, float64(h.CumulativeStats.DownloadedBytes))
+	m <- utils.Gauge("transmission_upload_total_bytes", nil, float64(h.CumulativeStats.UploadedBytes))
 
 	torrents, err := r.client.TorrentGet(ctx, torrentFields, nil)
 	if err != nil {
