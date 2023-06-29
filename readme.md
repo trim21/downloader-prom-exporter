@@ -30,3 +30,10 @@ scrape_configs:
 ## dashboard
 
 https://grafana.com/grafana/dashboards/18986
+
+
+## Tips
+
+Some downloaders' rpc thread may freeze in some situation, this will may block all downloader exporter.
+
+If you want to avoid this, please run multiple exporter with separated config.
