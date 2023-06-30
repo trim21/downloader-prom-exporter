@@ -34,6 +34,6 @@ https://grafana.com/grafana/dashboards/18986
 
 ## Tips
 
-Some downloaders' rpc thread may freeze in some situation, this will may block all downloader exporter.
+Some downloaders' rpc thread may freeze in some situation, this will block downloader exporter.
 
-If you want to avoid this, please run multiple exporter with separated config.
+If you want to avoid this, please run each exporter instance for each downloader.
