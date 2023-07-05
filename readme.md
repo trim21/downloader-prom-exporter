@@ -1,5 +1,11 @@
 A prometheus exporter for rtorrent, transmissionBT or qbittorrent.
 
+# quick start
+
+downloader-prom-exporter is release as docker image
+
+## docker compose file
+
 ```yaml
 version: "3.7"
 
@@ -18,6 +24,8 @@ service:
       - "8521:80"
 ```
 
+## prometheus config
+
 In your prometheus scrape config
 
 ```yaml
@@ -27,7 +35,7 @@ scrape_configs:
       - targets: ["127.0.0.1:8521"]
 ```
 
-## dashboard
+# dashboard
 
 https://grafana.com/grafana/dashboards/18986
 
@@ -77,9 +85,9 @@ export RTORRENT_API_ENTRYPOINT="http://rtorrent.omv.trim21.me/RPC2"
 
 ## Tips
 
-In some case, for example, transmission's rpc will stop handling requests when moving files.
+In some case, for example, transmission's rpc will stop handling requests when moving files, rtorrent also may stop handling requests when in some case.
 
-This will block the rpc request and may cause prometheus scrape failed with timeout.
+This will block the rpc request and may cause prometheus scraping failed with timeout.
 
 If you want to avoid this, you will need to run dedicated exporter instance for each downloader,
 so one downloader client won't affect other client's exporting.
