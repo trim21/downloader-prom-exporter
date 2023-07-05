@@ -31,9 +31,55 @@ scrape_configs:
 
 https://grafana.com/grafana/dashboards/18986
 
+# Transmission config details
+
+If url path is empty string or `/`, download-exporter will use default rpc path `/transmission/rpc`.
+
+You can also set non-standard transmission rpc path 
+
+```shell
+export TRANSMISSION_API_ENTRYPOINT="http://admin:password@127.0.0.1/transmission/rpc"
+```
+
+# rTorrent config details
+
+HTTP, TCP or unix socket protocol are all supported.
+
+
+## unix domain socket
+
+both relative path and absolute path are support
+
+```shell
+export RTORRENT_API_ENTRYPOINT="scgi:////home/ubuntu/.local/share/.rtorrent.sock"
+```
+
+```shell
+export RTORRENT_API_ENTRYPOINT="scgi:///.local/share/.rtorrent.sock"
+```
+
+**exporter doesn't support user home expanding, do not use `~/...`**
+
+## TCP
+
+```shell
+export RTORRENT_API_ENTRYPOINT="scgi://127.0.0.1:5000"
+```
+
+## HTTP
+
+if you are using apache, nginx or any http server to proxy scgi protocol to HTTP protocol:
+```shell
+export RTORRENT_API_ENTRYPOINT="http://rtorrent.omv.trim21.me/RPC2"
+```
+
+**you can't omit url path**
 
 ## Tips
 
-Some downloaders' rpc thread may freeze in some situation, this will block downloader exporter.
+In some case, for example, transmission's rpc will stop handling requests when moving files.
 
-If you want to avoid this, please run each exporter instance for each downloader.
+This will block the rpc request and may cause prometheus scrape failed with timeout.
+
+If you want to avoid this, you will need to run dedicated exporter instance for each downloader,
+so one downloader client won't affect other client's exporting.

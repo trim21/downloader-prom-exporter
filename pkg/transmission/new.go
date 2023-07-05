@@ -26,9 +26,15 @@ func New() (*transmissionrpc.Client, error) {
 	username, password := utils.GetUserPass(u.User)
 	port := utils.GetPort(u)
 
+	var rpcPath = ""
+	if !(u.Path == "" || u.Path == "/") {
+		rpcPath = u.Path
+	}
+
 	client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
-		HTTPS: u.Scheme == "https",
-		Port:  port,
+		HTTPS:  u.Scheme == "https",
+		Port:   port,
+		RPCURI: rpcPath,
 	})
 	if err != nil {
 		return nil, errgo.Wrap(err, "failed to create transmission client")
