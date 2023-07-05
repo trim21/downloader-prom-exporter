@@ -64,7 +64,7 @@ absolute file path
 export RTORRENT_API_ENTRYPOINT="scgi:////home/ubuntu/.local/share/.rtorrent.sock"
 ```
 
-relative file path
+relative file path, resolved from current working directory.
 
 ```shell
 export RTORRENT_API_ENTRYPOINT="scgi:///.local/share/.rtorrent.sock"
@@ -72,7 +72,9 @@ export RTORRENT_API_ENTRYPOINT="scgi:///.local/share/.rtorrent.sock"
 
 (notice the triple slash `///` before file path)
 
-**exporter doesn't support user home expanding, do not use `~/...`**
+exporter doesn't support user home expanding, do not use `~/...`.
+
+also, don't forget to mount your unix socket file into docker container.
 
 ## TCP
 
