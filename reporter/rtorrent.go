@@ -53,8 +53,8 @@ func (r rTorrentExporter) Collect(m chan<- prometheus.Metric) {
 	}
 
 	labels := prometheus.Labels{"hostname": v.Hostname}
-	m <- utils.Gauge("rtorrent_upload_total_bytes", labels, float64(v.UpTotal))
-	m <- utils.Gauge("rtorrent_download_total_bytes", labels, float64(v.DownTotal))
+	m <- utils.Count("rtorrent_upload_total_bytes", labels, float64(v.UpTotal))
+	m <- utils.Count("rtorrent_download_total_bytes", labels, float64(v.DownTotal))
 
 	for _, t := range v.Torrents {
 		labels := prometheus.Labels{"hash": t.Hash}

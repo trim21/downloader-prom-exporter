@@ -46,8 +46,8 @@ func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 		return
 	}
 
-	m <- utils.Gauge("qbittorrent_up_info_data_bytes", nil, float64(t.UpInfoData))
-	m <- utils.Gauge("qbittorrent_dl_info_data_bytes", nil, float64(t.DlInfoData))
+	m <- utils.Count("qbittorrent_up_info_data_bytes", nil, float64(t.UpInfoData))
+	m <- utils.Count("qbittorrent_dl_info_data_bytes", nil, float64(t.DlInfoData))
 	m <- utils.Gauge("qbittorrent_dht_nodes", nil, float64(t.DhtNodes))
 
 	d, err := r.client.MainData()
