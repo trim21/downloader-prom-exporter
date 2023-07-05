@@ -83,7 +83,7 @@ export RTORRENT_API_ENTRYPOINT="http://rtorrent.omv.trim21.me/RPC2"
 
 **you can't omit url path**
 
-## Tips
+# Tips
 
 In some case, for example, transmission's rpc will stop handling requests when moving files, rtorrent also may stop handling requests when in some case.
 
