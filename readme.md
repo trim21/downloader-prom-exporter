@@ -58,13 +58,19 @@ HTTP, TCP or unix socket protocol are all supported.
 
 both relative path and absolute path are support
 
+absolute file path
+
 ```shell
 export RTORRENT_API_ENTRYPOINT="scgi:////home/ubuntu/.local/share/.rtorrent.sock"
 ```
 
+relative file path
+
 ```shell
 export RTORRENT_API_ENTRYPOINT="scgi:///.local/share/.rtorrent.sock"
 ```
+
+(notice the triple slash `///` before file path)
 
 **exporter doesn't support user home expanding, do not use `~/...`**
 
