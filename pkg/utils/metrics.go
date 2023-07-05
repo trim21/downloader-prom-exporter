@@ -27,6 +27,21 @@ func (c count) Desc() *prometheus.Desc {
 
 func (c count) Write(metric *dto.Metric) error {
 	metric.Counter = &dto.Counter{Value: &c.value}
+	metric.Label = toLabelParis(c.labels)
 
 	return nil
+}
+
+func toLabelParis(labels prometheus.Labels) []*dto.LabelPair {
+	var r = make([]*dto.LabelPair, 0, len(labels))
+	for key, value := range labels {
+		key := key
+		value := value
+		r = append(r, &dto.LabelPair{
+			Name:  &key,
+			Value: &value,
+		})
+	}
+
+	return r
 }
