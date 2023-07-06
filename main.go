@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/trim21/errgo"
 
-	"app/reporter"
+	"app/pkg/reporter"
 )
 
 func main() {

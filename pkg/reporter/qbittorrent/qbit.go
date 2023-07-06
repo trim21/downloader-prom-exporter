@@ -1,4 +1,4 @@
-package reporter
+package qbittorrent
 
 import (
 	"net/url"
@@ -7,33 +7,38 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
 
-	"app/pkg/qbittorrent"
 	"app/pkg/utils"
 )
 
-func setupQBitMetrics() prometheus.Collector {
+func SetupMetrics() error {
 	entryPoint, found := os.LookupEnv("QBIT_API_ENTRYPOINT")
 	if !found {
+		log.Info().Msg("env QBIT_API_ENTRYPOINT not set, qbittorrent exporter disabled")
 		return nil
 	}
 
 	u, err := url.Parse(entryPoint)
 	if err != nil {
 		log.Fatal().Str("value", entryPoint).Msg("can't parse QBIT_API_ENTRYPOINT")
-		return nil
+		return err
 	}
 
-	rpc, err := qbittorrent.NewClient(u)
+	rpc, err := newClient(u)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create qbittorrent rpc client")
-		return nil
+		return err
 	}
 
-	return qBittorrentExporter{client: rpc}
+	log.Info().Msg("enable qbittorrent reporter")
+
+	c := qBittorrentExporter{client: rpc}
+	prometheus.MustRegister(c)
+
+	return nil
 }
 
 type qBittorrentExporter struct {
-	client *qbittorrent.Client
+	client *Client
 }
 
 func (r qBittorrentExporter) Describe(c chan<- *prometheus.Desc) {

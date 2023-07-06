@@ -1,31 +1,37 @@
-package reporter
+package transmission
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/hekmon/transmissionrpc/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
 
-	"app/pkg/transmission"
 	"app/pkg/utils"
 )
 
 var torrentFields = []string{"hashString", "status", "name", "labels", "uploadedEver", "downloadedEver"}
 
-func setupTransmissionMetrics() (prometheus.Collector, error) {
-	client, err := transmission.New()
-	if err != nil {
-		return nil, err
+func SetupMetrics() error {
+	entryPoint, found := os.LookupEnv("TRANSMISSION_API_ENTRYPOINT")
+	if !found {
+		log.Info().Msg("env TRANSMISSION_API_ENTRYPOINT not set, transmission exporter disabled")
+		return nil
 	}
-	if client == nil {
-		return nil, nil
+
+	client, err := newClient(entryPoint)
+	if err != nil {
+		return err
 	}
 
 	log.Info().Msg("enable transmission reporter")
 
-	return transmissionExporter{client: client}, nil
+	c := transmissionExporter{client: client}
+	prometheus.MustRegister(c)
+
+	return nil
 }
 
 type transmissionExporter struct {

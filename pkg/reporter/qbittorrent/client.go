@@ -41,7 +41,7 @@ type Client struct {
 	Authenticated bool
 }
 
-func NewClient(entryPoint *url.URL) (*Client, error) {
+func newClient(entryPoint *url.URL) (*Client, error) {
 	h := resty.New().SetBaseURL(entryPoint.String())
 
 	return &Client{
