@@ -30,12 +30,12 @@ func (t Torrent) Labels() []string {
 
 var ErrDecodeTorrent = xml.UnmarshalError("can't decode torrent property tuple")
 
-func parseTorrents(results interface{}) ([]Torrent, error) {
+func parseTorrents(results any) ([]Torrent, error) {
 	var torrents []Torrent
 
-	for _, outerResult := range results.([]interface{}) {
-		for _, innerResult := range outerResult.([]interface{}) {
-			torrentData, ok := innerResult.([]interface{})
+	for _, outerResult := range results.([]any) {
+		for _, innerResult := range outerResult.([]any) {
+			torrentData, ok := innerResult.([]any)
 			if !ok {
 				return nil, ErrDecodeTorrent
 			}
@@ -77,18 +77,18 @@ type MainData struct {
 }
 
 type call struct {
-	MethodName string        `xml:"methodName"`
-	Params     []interface{} `xml:"params"`
+	MethodName string `xml:"methodName"`
+	Params     []any  `xml:"params"`
 }
 
 var ErrUnmarshal = xml.UnmarshalError("failed to decode xmlrpc multicall response")
 
 func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 	results, err := rpc.Call("system.multicall", []call{
-		{MethodName: "system.hostname", Params: nil},
-		{MethodName: "throttle.global_down.total", Params: nil},
-		{MethodName: "throttle.global_up.total", Params: nil},
-		{MethodName: "d.multicall2", Params: []interface{}{
+		{MethodName: "system.hostname"},
+		{MethodName: "throttle.global_down.total"},
+		{MethodName: "throttle.global_up.total"},
+		{MethodName: "d.multicall2", Params: []any{
 			"",
 			string(rtorrent.ViewMain),
 			rtorrent.DName.Query(),
@@ -104,12 +104,12 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 
 	v := &MainData{}
 
-	r1, ok := results.([]interface{})
+	r1, ok := results.([]any)
 	if !ok {
 		return nil, ErrUnmarshal
 	}
 
-	r, ok := r1[0].([]interface{})
+	r, ok := r1[0].([]any)
 	if !ok {
 		return nil, ErrUnmarshal
 	}
@@ -145,9 +145,9 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 	return v, nil
 }
 
-// get first value from [][]interface{} as string.
-func getString(r []interface{}, index int) (string, bool) {
-	vv, ok := r[index].([]interface{})
+// get first value from [][]any as string.
+func getString(r []any, index int) (string, bool) {
+	vv, ok := r[index].([]any)
 	if !ok {
 		return "", ok
 	}
@@ -157,9 +157,9 @@ func getString(r []interface{}, index int) (string, bool) {
 	return v, ok
 }
 
-// get first value from [][]interface{} as int.
-func getInt(r []interface{}, index int) (int, bool) {
-	vv, ok := r[index].([]interface{})
+// get first value from [][]any as int.
+func getInt(r []any, index int) (int, bool) {
+	vv, ok := r[index].([]any)
 	if !ok {
 		return 0, ok
 	}
