@@ -16,7 +16,7 @@ import (
 
 func main() {
 	if err := Start(); err != nil {
-		log.Fatal().Msg("failed to start HTTP server")
+		log.Fatal().Err(err).Msg("failed to start HTTP server")
 	}
 }
 
