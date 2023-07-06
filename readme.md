@@ -46,7 +46,7 @@ If url path is empty string or `/`, download-exporter will use default rpc path 
 You can also set non-standard transmission rpc path 
 
 ```shell
-export TRANSMISSION_API_ENTRYPOINT="http://admin:password@127.0.0.1/tr/rpc"
+export TRANSMISSION_API_ENTRYPOINT="http://admin:password@127.0.0.1:9091/tr/rpc"
 ```
 
 # rTorrent config details
