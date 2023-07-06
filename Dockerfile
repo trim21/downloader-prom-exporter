@@ -1,5 +1,5 @@
 FROM gcr.io/distroless/base
 
-COPY dist/app /app/my-site-proxy
+COPY dist/app /app/downloader-prom-exporter
 
-ENTRYPOINT ["/app/my-site-proxy"]
+ENTRYPOINT ["/app/downloader-prom-exporter"]
