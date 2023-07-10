@@ -8,6 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/prometheus/client_golang v1.16.0
+	github.com/prometheus/client_model v0.3.0
 	github.com/rs/zerolog v1.29.1
 	github.com/trim21/errgo v0.0.2
 	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
@@ -23,7 +24,6 @@ require (
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect

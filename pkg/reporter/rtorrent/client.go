@@ -79,6 +79,7 @@ type MainData struct {
 	Torrents  []Torrent
 	UpTotal   int
 	DownTotal int
+	DHTNodes  int
 }
 
 type call struct {
@@ -103,6 +104,7 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 			DUploadTotal.Query(),
 			"d.peers_connected=",
 		}},
+		{MethodName: "dht.statistics"},
 	})
 	if err != nil {
 		return nil, errgo.Wrap(err, "failed to get current status")
@@ -147,6 +149,8 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 	if v.Torrents, err = parseTorrents(r[3]); err != nil {
 		return nil, errgo.Wrap(err, "failed to decode Torrents")
 	}
+
+	v.DHTNodes = r[4].([]any)[0].(map[string]any)["active"].(int)
 
 	return v, nil
 }
