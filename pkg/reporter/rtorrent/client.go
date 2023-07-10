@@ -17,11 +17,12 @@ const (
 
 // Torrent represents a torrent in rTorrent.
 type Torrent struct {
-	Name          string
-	Hash          string
-	Label         string
-	DownloadTotal int
-	UploadTotal   int
+	Name           string
+	Hash           string
+	Label          string
+	DownloadTotal  int
+	UploadTotal    int
+	PeerConnecting int
 }
 
 func (t Torrent) Labels() []string {
@@ -62,6 +63,10 @@ func parseTorrents(results any) ([]Torrent, error) {
 				return nil, ErrDecodeTorrent
 			}
 
+			if t.PeerConnecting, ok = torrentData[5].(int); !ok {
+				return nil, ErrDecodeTorrent
+			}
+
 			torrents = append(torrents, t)
 		}
 	}
@@ -96,6 +101,7 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 			rtorrent.DLabel.Query(),
 			DDownloadTotal.Query(),
 			DUploadTotal.Query(),
+			"d.peers_connected=",
 		}},
 	})
 	if err != nil {
