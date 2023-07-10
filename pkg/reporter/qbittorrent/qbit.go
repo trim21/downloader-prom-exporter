@@ -68,6 +68,7 @@ func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 	m <- utils.Gauge("qbittorrent_download_total_bytes", nil, float64(s.AllTimeDl))
 	m <- utils.Gauge("qbittorrent_queued_io_jobs", nil, float64(s.QueuedIoJobs))
 	m <- utils.Gauge("qbittorrent_average_queue_time_ms", nil, float64(s.AverageTimeQueue))
+	m <- utils.Gauge("qbittorrent_total_peer_connections", nil, float64(s.TotalPeerConnections))
 
 	for hash, t := range d.Torrents {
 		labels := prometheus.Labels{"category": t.Category, "hash": hash}

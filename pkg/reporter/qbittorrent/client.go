@@ -118,19 +118,20 @@ func (c *Client) Torrents() ([]Torrent, error) {
 }
 
 type ServerState struct {
-	ReadCacheHits      string `json:"read_cache_hits"`
-	WriteCacheOverload string `json:"write_cache_overload"`
-	ReadCacheOverload  string `json:"read_cache_overload"`
-	DhtNodes           int    `json:"dht_nodes"`
-	DlInfoSpeed        int    `json:"dl_info_speed"`
-	DlRateLimit        int    `json:"dl_rate_limit"`
-	AverageTimeQueue   int    `json:"average_time_queue"`
-	AllTimeUl          int64  `json:"alltime_ul"` //nolint:misspell
-	DlInfoData         int64  `json:"dl_info_data"`
-	UpInfoData         int64  `json:"up_info_data"`
-	QueuedIoJobs       int    `json:"queued_io_jobs"`
-	TotalBuffersSize   int    `json:"total_buffers_size"`
-	AllTimeDl          int64  `json:"alltime_dl"` //nolint:misspell
+	ReadCacheHits        string `json:"read_cache_hits"`
+	WriteCacheOverload   string `json:"write_cache_overload"`
+	ReadCacheOverload    string `json:"read_cache_overload"`
+	DhtNodes             int    `json:"dht_nodes"`
+	DlInfoSpeed          int    `json:"dl_info_speed"`
+	DlRateLimit          int    `json:"dl_rate_limit"`
+	AverageTimeQueue     int    `json:"average_time_queue"`
+	AllTimeUl            int64  `json:"alltime_ul"` //nolint:misspell
+	DlInfoData           int64  `json:"dl_info_data"`
+	UpInfoData           int64  `json:"up_info_data"`
+	QueuedIoJobs         int    `json:"queued_io_jobs"`
+	TotalBuffersSize     int    `json:"total_buffers_size"`
+	AllTimeDl            int64  `json:"alltime_dl"` //nolint:misspell
+	TotalPeerConnections int    `json:"total_peer_connections"`
 }
 
 // ConnectionStatus     string `json:"connection_status"`
@@ -138,7 +139,6 @@ type ServerState struct {
 // GlobalRatio          string `json:"global_ratio"`
 // Queueing             bool   `json:"queueing"`
 // RefreshInterval      int    `json:"refresh_interval"`
-// TotalPeerConnections int    `json:"total_peer_connections"`
 // TotalQueuedSize      int    `json:"total_queued_size"`
 // TotalWastedSession   int    `json:"total_wasted_session"`
 // UpInfoSpeed          int    `json:"up_info_speed"`
