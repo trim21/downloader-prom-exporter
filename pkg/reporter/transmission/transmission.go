@@ -50,10 +50,10 @@ func (r transmissionExporter) Collect(m chan<- prometheus.Metric) {
 		return
 	}
 
-	m <- utils.Gauge("transmission_download_session_bytes", nil, float64(h.CurrentStats.DownloadedBytes))
-	m <- utils.Gauge("transmission_upload_session_bytes", nil, float64(h.CurrentStats.UploadedBytes))
-	m <- utils.Gauge("transmission_download_total_bytes", nil, float64(h.CumulativeStats.DownloadedBytes))
-	m <- utils.Gauge("transmission_upload_total_bytes", nil, float64(h.CumulativeStats.UploadedBytes))
+	m <- utils.Gauge("transmission_download_session_bytes", nil, float64(h.CurrentStats.DownloadedBytes), "session download bytes")
+	m <- utils.Gauge("transmission_upload_session_bytes", nil, float64(h.CurrentStats.UploadedBytes), "session upload bytes")
+	m <- utils.Gauge("transmission_download_total_bytes", nil, float64(h.CumulativeStats.DownloadedBytes), "client download bytes")
+	m <- utils.Gauge("transmission_upload_total_bytes", nil, float64(h.CumulativeStats.UploadedBytes), "client upload bytes")
 
 	torrents, err := r.client.TorrentGet(ctx, torrentFields, nil)
 	if err != nil {
@@ -63,7 +63,7 @@ func (r transmissionExporter) Collect(m chan<- prometheus.Metric) {
 
 	for _, torrent := range torrents {
 		label := prometheus.Labels{"hash": *torrent.HashString}
-		m <- utils.Gauge("transmission_torrent_upload_bytes", label, float64(*torrent.UploadedEver))
-		m <- utils.Gauge("transmission_torrent_download_bytes", label, float64(*torrent.DownloadedEver))
+		m <- utils.Gauge("transmission_torrent_upload_bytes", label, float64(*torrent.UploadedEver), "")
+		m <- utils.Gauge("transmission_torrent_download_bytes", label, float64(*torrent.DownloadedEver), "")
 	}
 }

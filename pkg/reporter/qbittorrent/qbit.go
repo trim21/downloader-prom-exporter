@@ -51,9 +51,9 @@ func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 		return
 	}
 
-	m <- utils.Count("qbittorrent_up_info_data_bytes", nil, float64(t.UpInfoData))
-	m <- utils.Count("qbittorrent_dl_info_data_bytes", nil, float64(t.DlInfoData))
-	m <- utils.Gauge("qbittorrent_dht_nodes", nil, float64(t.DhtNodes))
+	m <- utils.Count("qbittorrent_up_info_data_bytes", nil, float64(t.UpInfoData), "session upload bytes")
+	m <- utils.Count("qbittorrent_dl_info_data_bytes", nil, float64(t.DlInfoData), "session download bytes")
+	m <- utils.Gauge("qbittorrent_dht_nodes", nil, float64(t.DhtNodes), "dht nodes")
 
 	d, err := r.client.MainData()
 	if err != nil {
@@ -63,16 +63,16 @@ func (r qBittorrentExporter) Collect(m chan<- prometheus.Metric) {
 
 	s := d.ServerState
 
-	m <- utils.Gauge("qbittorrent_total_buffers_size", nil, float64(s.TotalBuffersSize))
-	m <- utils.Gauge("qbittorrent_upload_total_bytes", nil, float64(s.AllTimeUl))
-	m <- utils.Gauge("qbittorrent_download_total_bytes", nil, float64(s.AllTimeDl))
-	m <- utils.Gauge("qbittorrent_queued_io_jobs", nil, float64(s.QueuedIoJobs))
-	m <- utils.Gauge("qbittorrent_average_queue_time_ms", nil, float64(s.AverageTimeQueue))
-	m <- utils.Gauge("qbittorrent_total_peer_connections", nil, float64(s.TotalPeerConnections))
+	m <- utils.Gauge("qbittorrent_total_buffers_size", nil, float64(s.TotalBuffersSize), "")
+	m <- utils.Gauge("qbittorrent_upload_total_bytes", nil, float64(s.AllTimeUl), "client upload total bytes")
+	m <- utils.Gauge("qbittorrent_download_total_bytes", nil, float64(s.AllTimeDl), "client upload total bytes")
+	m <- utils.Gauge("qbittorrent_queued_io_jobs", nil, float64(s.QueuedIoJobs), "")
+	m <- utils.Gauge("qbittorrent_average_queue_time_ms", nil, float64(s.AverageTimeQueue), "")
+	m <- utils.Gauge("qbittorrent_total_peer_connections", nil, float64(s.TotalPeerConnections), "client current peer connection count")
 
 	for hash, t := range d.Torrents {
 		labels := prometheus.Labels{"category": t.Category, "hash": hash}
-		m <- utils.Gauge("qbittorrent_torrent_download_bytes", labels, float64(t.Downloaded))
-		m <- utils.Gauge("qbittorrent_torrent_upload_bytes", labels, float64(t.Uploaded))
+		m <- utils.Gauge("qbittorrent_torrent_download_bytes", labels, float64(t.Downloaded), "torrent downloaded bytes")
+		m <- utils.Gauge("qbittorrent_torrent_upload_bytes", labels, float64(t.Uploaded), "torrent upload bytes")
 	}
 }

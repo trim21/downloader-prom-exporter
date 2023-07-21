@@ -56,19 +56,19 @@ func (r rTorrentExporter) Collect(m chan<- prometheus.Metric) {
 	}
 
 	labels := prometheus.Labels{"hostname": v.Hostname}
-	m <- utils.Count("rtorrent_upload_total_bytes", labels, float64(v.UpTotal))
-	m <- utils.Count("rtorrent_download_total_bytes", labels, float64(v.DownTotal))
-	m <- utils.Count("rtorrent_dht_nodes", labels, float64(v.DHTNodes))
+	m <- utils.Count("rtorrent_upload_total_bytes", labels, float64(v.UpTotal), "")
+	m <- utils.Count("rtorrent_download_total_bytes", labels, float64(v.DownTotal), "")
+	m <- utils.Count("rtorrent_dht_nodes", labels, float64(v.DHTNodes), "")
 
 	var peerCount int
 	for _, torrent := range v.Torrents {
 		peerCount += torrent.PeerConnecting
 	}
-	m <- utils.Count("rtorrent_total_peer_connections", labels, float64(peerCount))
+	m <- utils.Count("rtorrent_total_peer_connections", labels, float64(peerCount), "")
 
 	for _, t := range v.Torrents {
 		labels := prometheus.Labels{"hash": t.Hash}
-		m <- utils.Gauge("rtorrent_torrent_download_bytes", labels, float64(t.DownloadTotal))
-		m <- utils.Gauge("rtorrent_torrent_upload_bytes", labels, float64(t.UploadTotal))
+		m <- utils.Gauge("rtorrent_torrent_download_bytes", labels, float64(t.DownloadTotal), "")
+		m <- utils.Gauge("rtorrent_torrent_upload_bytes", labels, float64(t.UploadTotal), "")
 	}
 }
