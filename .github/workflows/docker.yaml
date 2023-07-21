@@ -23,7 +23,7 @@ jobs:
         env:
           CGO_ENABLED: 0
 
-      - run: docker build -t ghcr.io/trim21/downloader-prom-exporter:latest .
+      - run: docker buildx build -t ghcr.io/trim21/downloader-prom-exporter:latest .
 
       - uses: docker/login-action@v2
         if: ${{ github.event_name == 'push' }}
