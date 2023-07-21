@@ -27,7 +27,7 @@ jobs:
 
       - run: go get ./...
 
-      - run: go build -ldflags="-s -w" -o dist/app
+      - run: go build -trimpath -ldflags="-s -w" -o dist/app
         env:
           CGO_ENABLED: 0
 
