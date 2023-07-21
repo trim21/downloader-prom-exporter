@@ -25,9 +25,12 @@ jobs:
 
       - run: docker build -t ghcr.io/trim21/downloader-prom-exporter:latest .
 
-      - run: |
-          echo $DOCKER_TOKEN | docker login ghcr.io -u Trim21 --password-stdin
-          docker push ghcr.io/trim21/downloader-prom-exporter:latest
+      - uses: docker/login-action@v2
         if: github.event_name == 'push'
-        env:
-          DOCKER_TOKEN: ${{ github.token }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - run: docker push ghcr.io/trim21/downloader-prom-exporter:latest
+        if: github.event_name == 'push'
