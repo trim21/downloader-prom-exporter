@@ -82,12 +82,22 @@ also, don't forget to mount your unix socket file into docker container.
 export RTORRENT_API_ENTRYPOINT="scgi://127.0.0.1:5000"
 ```
 
-## HTTP
+## HTTP(s)
 
-if you are using apache, nginx or any http server to proxy scgi protocol to HTTP protocol:
+If you are using apache, nginx or any http server to proxy scgi protocol to HTTP protocol:
+
 ```shell
 export RTORRENT_API_ENTRYPOINT="http://rtorrent.omv.trim21.me/RPC2"
 ```
+
+You can also use https protocol:
+
+```shell
+export RTORRENT_API_ENTRYPOINT="https://rtorrent.omv.trim21.me/RPC2"
+```
+
+But disable SSL verification is not supported. If you need this option, please consider sending a PR.
+
 
 **you can't omit url path**
 
