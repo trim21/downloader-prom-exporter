@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	// This would automatically load/inject environment variables from a .env file
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 	"github.com/trim21/errgo"
