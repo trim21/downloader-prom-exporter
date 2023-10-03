@@ -7,7 +7,7 @@ require (
 	github.com/hekmon/transmissionrpc/v2 v2.0.1
 	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/prometheus/client_golang v1.17.0
-	github.com/prometheus/client_model v0.4.1-0.20231002172004-cbe84deebbb8
+	github.com/prometheus/client_model v0.5.0
 	github.com/rs/zerolog v1.31.0
 	github.com/trim21/errgo v0.0.2
 	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
