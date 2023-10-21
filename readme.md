@@ -20,6 +20,8 @@ service:
       # or RTORRENT_API_ENTRYPOINT: "scgi:////home/ubuntu/.local/share/.rtorrent.sock"
       TRANSMISSION_API_ENTRYPOINT: "http://admin:password@192.168.1.3:8080"
       QBIT_API_ENTRYPOINT: "https://qb.omv.trim21.me"
+      # PORT: 80 # http listen port, default 80
+      # HOST: '0.0.0.0' # http listen host, default '0.0.0.0'
     ports:
       - "8521:80"
 ```
