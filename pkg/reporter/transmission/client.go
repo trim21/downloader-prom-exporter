@@ -15,6 +15,10 @@ func newClient(entryPoint string) (*transmissionrpc.Client, error) {
 		return nil, errgo.Wrap(err, fmt.Sprintf("TRANSMISSION_API_ENTRYPOINT '%s' is not valid url", entryPoint))
 	}
 
+	if !(u.Path == "" || u.Path == "/") {
+		u.Path = "/transmission/rpc"
+	}
+
 	client, err := transmissionrpc.New(u, nil)
 	if err != nil {
 		return nil, errgo.Wrap(err, "failed to create transmission client")
