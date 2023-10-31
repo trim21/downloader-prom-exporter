@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/hekmon/transmissionrpc/v2"
+	"github.com/hekmon/transmissionrpc/v3"
 
 	"github.com/trim21/errgo"
-
-	"app/pkg/utils"
 )
 
 func newClient(entryPoint string) (*transmissionrpc.Client, error) {
@@ -17,19 +15,11 @@ func newClient(entryPoint string) (*transmissionrpc.Client, error) {
 		return nil, errgo.Wrap(err, fmt.Sprintf("TRANSMISSION_API_ENTRYPOINT '%s' is not valid url", entryPoint))
 	}
 
-	username, password := utils.GetUserPass(u.User)
-	port := utils.GetPort(u)
-
-	var rpcPath = ""
 	if !(u.Path == "" || u.Path == "/") {
-		rpcPath = u.Path
+		u.Path = "/transmission/rpc"
 	}
 
-	client, err := transmissionrpc.New(u.Hostname(), username, password, &transmissionrpc.AdvancedConfig{
-		HTTPS:  u.Scheme == "https",
-		Port:   port,
-		RPCURI: rpcPath,
-	})
+	client, err := transmissionrpc.New(u, nil)
 	if err != nil {
 		return nil, errgo.Wrap(err, "failed to create transmission client")
 	}
