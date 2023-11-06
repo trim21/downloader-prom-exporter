@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/prometheus/client_golang/prometheus"
@@ -67,7 +68,7 @@ func (r rTorrentExporter) Collect(m chan<- prometheus.Metric) {
 	m <- utils.Count("rtorrent_total_peer_connections", labels, float64(peerCount), "")
 
 	for _, t := range v.Torrents {
-		labels := prometheus.Labels{"hash": t.Hash}
+		labels := prometheus.Labels{"hash": strings.ToLower(t.Hash)}
 		m <- utils.Gauge("rtorrent_torrent_download_bytes", labels, float64(t.DownloadTotal), "")
 		m <- utils.Gauge("rtorrent_torrent_upload_bytes", labels, float64(t.UploadTotal), "")
 	}
