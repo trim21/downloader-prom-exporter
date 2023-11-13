@@ -15,7 +15,7 @@ func newClient(entryPoint string) (*transmissionrpc.Client, error) {
 		return nil, errgo.Wrap(err, fmt.Sprintf("TRANSMISSION_API_ENTRYPOINT '%s' is not valid url", entryPoint))
 	}
 
-	if !(u.Path == "" || u.Path == "/") {
+	if u.Path == "" || u.Path == "/" {
 		u.Path = "/transmission/rpc"
 	}
 
