@@ -6,7 +6,7 @@ require (
 	github.com/go-resty/resty/v2 v2.13.0
 	github.com/hekmon/transmissionrpc/v3 v3.0.0
 	github.com/mrobinsn/go-rtorrent v1.8.0
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/rs/zerolog v1.32.0
 	github.com/trim21/errgo v0.0.2
