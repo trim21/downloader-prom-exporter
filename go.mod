@@ -3,7 +3,7 @@ module app
 go 1.20
 
 require (
-	github.com/go-resty/resty/v2 v2.13.0
+	github.com/go-resty/resty/v2 v2.13.1
 	github.com/hekmon/transmissionrpc/v3 v3.0.0
 	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/prometheus/client_golang v1.19.1
