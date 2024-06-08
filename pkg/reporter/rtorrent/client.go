@@ -6,8 +6,6 @@ import (
 	"github.com/mrobinsn/go-rtorrent/rtorrent"
 	"github.com/mrobinsn/go-rtorrent/xmlrpc"
 	"github.com/trim21/errgo"
-
-	"app/pkg/utils"
 )
 
 const (
@@ -19,14 +17,9 @@ const (
 type Torrent struct {
 	Name           string
 	Hash           string
-	Label          string
 	DownloadTotal  int
 	UploadTotal    int
 	PeerConnecting int
-}
-
-func (t Torrent) Labels() []string {
-	return utils.SplitByComma(t.Label)
 }
 
 var ErrDecodeTorrent = xml.UnmarshalError("can't decode torrent property tuple")
@@ -51,19 +44,15 @@ func parseTorrents(results any) ([]Torrent, error) {
 				return nil, ErrDecodeTorrent
 			}
 
-			if t.Label, ok = torrentData[2].(string); !ok {
+			if t.DownloadTotal, ok = torrentData[2].(int); !ok {
 				return nil, ErrDecodeTorrent
 			}
 
-			if t.DownloadTotal, ok = torrentData[3].(int); !ok {
+			if t.UploadTotal, ok = torrentData[3].(int); !ok {
 				return nil, ErrDecodeTorrent
 			}
 
-			if t.UploadTotal, ok = torrentData[4].(int); !ok {
-				return nil, ErrDecodeTorrent
-			}
-
-			if t.PeerConnecting, ok = torrentData[5].(int); !ok {
+			if t.PeerConnecting, ok = torrentData[4].(int); !ok {
 				return nil, ErrDecodeTorrent
 			}
 
@@ -99,7 +88,6 @@ func GetGlobalData(rpc *xmlrpc.Client) (*MainData, error) {
 			string(rtorrent.ViewMain),
 			rtorrent.DName.Query(),
 			rtorrent.DHash.Query(),
-			rtorrent.DLabel.Query(),
 			DDownloadTotal.Query(),
 			DUploadTotal.Query(),
 			"d.peers_connected=",
