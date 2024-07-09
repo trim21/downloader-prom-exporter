@@ -9,7 +9,7 @@ require (
 	github.com/prometheus/client_golang v1.19.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/rs/zerolog v1.33.0
-	github.com/trim21/errgo v0.0.2
+	github.com/trim21/errgo v0.0.3
 	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
 )
 
@@ -23,7 +23,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
