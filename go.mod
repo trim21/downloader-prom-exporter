@@ -9,7 +9,7 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/client_model v0.6.2
 	github.com/rs/zerolog v1.34.0
-	github.com/trim21/errgo v0.0.3
+	github.com/trim21/errgo v0.0.6
 	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
 )
 
