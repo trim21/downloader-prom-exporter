@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/base@sha256:007fbc0e0df2f12b739e9032a45ade4c58be0c9981767c440da6c404418f3144
+FROM gcr.io/distroless/base@sha256:9e9b50d2048db3741f86a48d939b4e4cc775f5889b3496439343301ff54cdba8
 
 COPY dist/app /app/downloader-prom-exporter
 
