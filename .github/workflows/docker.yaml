@@ -12,8 +12,8 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
       - uses: trim21/actions/setup-go@master
 
       - run: go build -trimpath -ldflags="-s -w" -o dist/app
