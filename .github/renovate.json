@@ -5,5 +5,10 @@
     "local>Trim21/renovate-config:go",
     "local>Trim21/renovate-config:app",
     "local>Trim21/renovate-config:monthly"
-  ]
+  ],
+  "labels": [
+    "ci:auto-merge",
+    "dependencies"
+  ],
+  "prConcurrentLimit": 3
 }
