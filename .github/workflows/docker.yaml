@@ -12,8 +12,8 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.2
       - uses: trim21/actions/setup-go@master
 
       - run: go build -trimpath -ldflags="-s -w" -o dist/app
@@ -22,7 +22,7 @@ jobs:
 
       - run: docker buildx build -t ghcr.io/trim21/downloader-prom-exporter:latest .
 
-      - uses: docker/login-action@v4
+      - uses: docker/login-action@v4.1.0
         if: ${{ github.event_name == 'push' }}
         with:
           registry: ghcr.io
