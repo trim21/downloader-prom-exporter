@@ -1,6 +1,6 @@
 module app
 
-go 1.25.8
+go 1.25.9
 
 require (
 	github.com/go-resty/resty/v2 v2.17.2
