@@ -12,8 +12,8 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v6.0.3
       - uses: trim21/actions/setup-go@master
 
       - run: go build -trimpath -ldflags="-s -w" -o dist/app
