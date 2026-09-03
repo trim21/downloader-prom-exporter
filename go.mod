@@ -7,7 +7,7 @@ require (
 	github.com/hekmon/transmissionrpc/v3 v3.0.0
 	github.com/mrobinsn/go-rtorrent v1.8.0
 	github.com/prometheus/client_golang v1.24.1
-	github.com/prometheus/client_model v0.6.2
+	github.com/prometheus/client_model v0.6.3
 	github.com/rs/zerolog v1.35.1
 	github.com/trim21/errgo v0.0.6
 	gopkg.in/scgi.v0 v0.0.0-20190103210333-4938577367bd
@@ -27,5 +27,5 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 )
